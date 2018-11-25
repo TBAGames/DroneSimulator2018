@@ -161,6 +161,7 @@ void SceneNode::Scale(glm::vec3 scale){
     scale_ *= scale;
 }
 
+// Function derived from https://code.google.com/archive/p/kri/wikis/Quaternions.wiki
 glm::vec3 SceneNode::qrot(glm::quat q, glm::vec3 v) {
 
 	glm::vec4 qv = glm::vec4(q.x, q.y, q.z, q.w);
