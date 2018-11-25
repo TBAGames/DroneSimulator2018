@@ -59,6 +59,9 @@ namespace game {
 			glm::quat GetOrientation(void) const;
 			glm::vec3 GetScale(void) const;
 
+			// Rotate vectors with quaternions
+			glm::vec3 qrot(glm::quat q, glm::vec3 v);
+
 			// Manage hierarchy
 			std::vector<SceneNode *> GetChildren();
 			SceneNode *GetParent();
@@ -66,6 +69,8 @@ namespace game {
 			void SetParent(SceneNode * parent);
 			void RemoveChild(SceneNode * node);
 			void RemoveParent();
+			SceneNode *GetChild(std::string name);
+
 			// Recursively grab the subtree with root this
 			std::vector<SceneNode *> *BuildNodeSubTree(std::vector<SceneNode *> *buildTree);
 
@@ -73,6 +78,9 @@ namespace game {
 			glm::vec3 position_; // Position of node
 			glm::quat orientation_; // Orientation of node
 			glm::vec3 scale_; // Scale of node
+
+			SceneNode *parent_;
+			std::vector<SceneNode *> children_;
 
         private:
             std::string name_; // Name of the scene node
@@ -82,9 +90,6 @@ namespace game {
             GLsizei size_; // Number of primitives in geometry
             GLuint material_; // Reference to shader program
             GLuint texture_; // Reference to texture resource
-
-			SceneNode *parent_;
-			std::vector<SceneNode *> children_;
 
             // Set matrices that transform the node in a shader program
             void SetupShader(GLuint program, bool toonModeOn, float roughness);

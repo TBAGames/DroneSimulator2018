@@ -130,13 +130,13 @@ void SceneNode::Translate(glm::vec3 trans){
 	
     position_ += trans;
 
-	if (parent_ != NULL) {
+	//if (parent_ != NULL) {
 		for (int i = 0; i < children_.size(); i++)
 		{
 			//std::cout << "Children of " << this->GetName() << ": " << std::endl;
 			children_.at(i)->Translate(trans);
 		}
-	}
+	//}
 }
 
 void SceneNode::Rotate(glm::quat rot){
@@ -144,15 +144,15 @@ void SceneNode::Rotate(glm::quat rot){
     orientation_ *= rot;
     orientation_ = glm::normalize(orientation_);
 
-	if (parent_ != NULL) {
+	//if (parent_ != NULL) {
 		for (int i = 0; i < children_.size(); i++)
 		{
-			SceneNode * child = children_.at(i);
+			//SceneNode * child = children_.at(i);
 			/*glm::vec3 offset = child->GetPosition() - position_;
 			glm::vec3 direction = glm::normalize(-offset);*/
-			child->Rotate(rot);
+			children_.at(i)->Rotate(rot);
 		}
-	}
+	//}
 }
 
 
@@ -161,6 +161,11 @@ void SceneNode::Scale(glm::vec3 scale){
     scale_ *= scale;
 }
 
+glm::vec3 SceneNode::qrot(glm::quat q, glm::vec3 v) {
+
+	glm::vec4 qv = glm::vec4(q.x, q.y, q.z, q.w);
+	return 2.0f*glm::cross(glm::vec3(qv), glm::cross(glm::vec3(qv), v) + q.w*v);
+}
 
 GLenum SceneNode::GetMode(void) const {
 
@@ -232,12 +237,25 @@ void SceneNode::SetParent(SceneNode *parent) {
 }
 
 void SceneNode::RemoveChild(SceneNode * node) {
+
 	for (int i = 0; i < children_.size(); i++) {
 		SceneNode *child;
 		if ((child = children_.at(i)) == node) {
 			children_.erase(children_.begin() + i);
 			child->RemoveParent();
 			return;
+		}
+	}
+}
+
+SceneNode *SceneNode::GetChild(std::string name) {
+	
+	SceneNode * child;
+
+	for (int i = 0; i < children_.size(); i++)
+	{
+		if ((child = children_.at(i))->GetName() == name) {
+			return child;
 		}
 	}
 }

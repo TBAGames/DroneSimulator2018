@@ -13,6 +13,8 @@ namespace game {
     // Abstraction of a camera
     class Camera : public SceneNode {
 
+		enum class CameraMode { FIRST_PERSON, THIRD_PERSON };
+
         public:
             Camera(void);
             ~Camera();
@@ -49,6 +51,11 @@ namespace game {
             // Set all camera-related variables in shader program
             void SetupShader(GLuint program);
 
+			// Swwitch between first and third person
+			void SwitchCameraMode(void);
+			void RepositionTetheredChild(SceneNode *child);
+
+
         private:
             //glm::vec3 position_; // Position of camera
             //glm::quat orientation_; // Orientation of camera
@@ -59,6 +66,10 @@ namespace game {
 
             // Create view matrix from current camera parameters
             void SetupViewMatrix(void);
+
+			CameraMode camera_mode_;
+			const glm::vec3 FIRST_PERSON_CHILD_POSITION_OFFSET = glm::vec3(0.0, 0.0, 2.0);
+			const glm::vec3 THIRD_PERSON_CHILD_POSITION_OFFSET = glm::vec3(0.0, -1.5, -1.5);
 
     }; // class Camera
 

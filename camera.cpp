@@ -83,6 +83,13 @@ void Camera::Pitch(float angle){
     glm::quat rotation = glm::angleAxis(angle, GetSide());
     orientation_ = rotation * orientation_;
     orientation_ = glm::normalize(orientation_);
+	
+	for (int i=0; i<children_.size(); i++) {
+		glm::vec3 offset_vec = children_.at(i)->GetPosition() - GetPosition();
+		glm::vec3 translation = qrot(rotation, offset_vec);
+		children_.at(i)->Translate(translation);
+		children_.at(i)->SetOrientation(orientation_);
+	}
 }
 
 
@@ -91,6 +98,13 @@ void Camera::Yaw(float angle){
     glm::quat rotation = glm::angleAxis(angle, GetUp());
     orientation_ = rotation * orientation_;
     orientation_ = glm::normalize(orientation_);
+
+	for (int i = 0; i<children_.size(); i++) {
+		glm::vec3 offset_vec = children_.at(i)->GetPosition() - GetPosition();
+		glm::vec3 translation = qrot(rotation, offset_vec);
+		children_.at(i)->Translate(translation);
+		children_.at(i)->SetOrientation(orientation_);
+	}
 }
 
 
@@ -99,6 +113,13 @@ void Camera::Roll(float angle){
     glm::quat rotation = glm::angleAxis(angle, GetForward());
     orientation_ = rotation * orientation_;
     orientation_ = glm::normalize(orientation_);
+
+	for (int i = 0; i<children_.size(); i++) {
+		glm::vec3 offset_vec = children_.at(i)->GetPosition() - GetPosition();
+		glm::vec3 translation = qrot(rotation, offset_vec);
+		children_.at(i)->Translate(translation);
+		children_.at(i)->SetOrientation(orientation_);
+	}
 }
 
 
@@ -176,6 +197,28 @@ void Camera::SetupViewMatrix(void){
 
     // Combine translation and view matrix in proper order
     view_matrix_ *= trans;
+}
+
+void Camera::SwitchCameraMode(void) {
+
+	if (camera_mode_ == CameraMode::FIRST_PERSON) {
+		camera_mode_ = CameraMode::THIRD_PERSON;
+
+	}
+	else {
+		camera_mode_ = CameraMode::FIRST_PERSON;
+	}
+
+	RepositionTetheredChild(GetChild("Ship"));
+}
+
+void Camera::RepositionTetheredChild(SceneNode * child) {
+	if (camera_mode_ == CameraMode::THIRD_PERSON) {
+		child->SetPosition(THIRD_PERSON_CHILD_POSITION_OFFSET);
+	}
+	else {
+		child->SetPosition(FIRST_PERSON_CHILD_POSITION_OFFSET);
+	}
 }
 
 } // namespace game

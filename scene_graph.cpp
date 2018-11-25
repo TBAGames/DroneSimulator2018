@@ -49,7 +49,7 @@ void SceneGraph::AddNode(SceneNode *node){
 
     node_.push_back(node);
 
-	std::vector<SceneNode *> *subTreeNodes;
+	std::vector<SceneNode *> *subTreeNodes = new std::vector<SceneNode *>();
 	node->BuildNodeSubTree(subTreeNodes);
 
 	node_.insert(node_.end(), subTreeNodes->begin(), subTreeNodes->end());

@@ -152,6 +152,10 @@ void Game::SetupScene(void){
     // Set background color for the scene
     scene_.SetBackgroundColor(viewport_background_color_g);
 
+	// Create Ship
+	game::SceneNode *ship = CreateAsteroidInstance("Ship", "CubeMesh", "ShinyBlueMaterial");
+	camera_.SwitchCameraMode();
+
  //   // Create an instance of the turret
 	game::SceneNode *turretBase = CreateInstance("TurretBase", "TurretMesh", "TexturedMaterial", "Crystal");
 	game::SceneNode *turretHead = CreateInstance("TurretHead", "TurretMesh", "TexturedMaterial", "Nebula");
@@ -159,7 +163,6 @@ void Game::SetupScene(void){
 	game::SceneNode *cannonHead = CreateInstance("CannonHead", "TurretMesh", "TexturedMaterial", "Nebula");
 
 	// Turret Hierarchy
-	camera_.AddChild(turretBase);
 	turretBase->AddChild(turretHead);
 	turretHead->AddChild(cannonBase);
 	cannonBase->AddChild(cannonHead);
@@ -341,6 +344,9 @@ void Game::KeyCallback(GLFWwindow* window, int key, int scancode, int action, in
 	if (key == GLFW_KEY_9 && action == GLFW_PRESS) {
 		game->DecrementSurfaceRoughness();
 	}
+	if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
+		game->GetCamera()->SwitchCameraMode();
+	}
 }
 
 
@@ -375,7 +381,8 @@ Asteroid *Game::CreateAsteroidInstance(std::string entity_name, std::string obje
 
     // Create asteroid instance
     Asteroid *ast = new Asteroid(entity_name, geom, mat);
-    scene_.AddNode(ast);
+	scene_.AddNode(ast);
+    camera_.AddChild(ast);
     return ast;
 }
 
@@ -425,8 +432,12 @@ SceneNode *Game::CreateInstance(std::string entity_name, std::string object_name
     SceneNode *scn = scene_.CreateNode(entity_name, geom, mat, tex);
 
 	//By default, add new node to scene
-	camera_.AddChild(scn);
+	scene_.AddNode(scn);
     return scn;
+}
+
+Camera *Game::GetCamera() {
+	return &camera_;
 }
 
 } // namespace game
