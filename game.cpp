@@ -264,6 +264,7 @@ void Game::MainLoop(void){
 				glm::vec3 offset_from_player = glm::vec3(1.0, 1.0, -10.0);
                 node = scene_.GetNode("CubeInstance1");
 				node->Pitch(rotation_factor*rotation_degree_pitch);
+				camera_.Translate(node->GetPosition() - camera_.GetPosition());
 				camera_.Pitch(rotation_factor*rotation_degree_pitch);
 				node->Yaw(rotation_factor*rotation_degree_yaw);
 				camera_.Yaw(rotation_factor*rotation_degree_yaw);
