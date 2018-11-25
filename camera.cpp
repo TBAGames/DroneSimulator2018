@@ -96,12 +96,19 @@ void Camera::Update(void) {
 
 	SceneNode *ship = GetChild("Ship");
 
+	glm::vec3 position, look_at, up;
+	up = ship->GetUp();
+
 	if (camera_mode_ == CameraMode::FIRST_PERSON) {
-		SetView((-3.0f)*glm::normalize(ship->GetForward()) + ship->GetPosition() + glm::normalize(ship->GetUp()), ship->GetPosition() - (-3.0f)*glm::normalize(ship->GetForward()), ship->GetUp());
+		position = ship->GetPosition() + ship->GetForward();
+		look_at = ship->GetForward();
 	}
 	else {
-		SetView((-10.0f)*glm::normalize(ship->GetForward()) + ship->GetPosition() + glm::normalize(ship->GetUp()), ship->GetPosition() - (-10.0f)*glm::normalize(ship->GetForward()), ship->GetUp());
+		position = ship->GetPosition() + (-15.0f)*ship->GetForward() + ship->GetUp()*6.0f;
+		look_at = ship->GetPosition() + (5.0f)*ship->GetForward();
 	}
+
+	SetView(position, look_at, up);
 }
 
 
