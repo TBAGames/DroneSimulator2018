@@ -48,6 +48,15 @@ namespace game {
 			void Translate(glm::vec3 trans);
 			void Rotate(glm::quat rot);
 			void Scale(glm::vec3 scale);
+
+			//The good stuff
+			glm::vec3 GetForward(void) const;
+			glm::vec3 GetSide(void) const;
+			glm::vec3 GetUp(void) const;
+			void Pitch(float angle);
+			void Yaw(float angle);
+			void Roll(float angle);
+			//Oh yes
 		
 			// Set node attributes
 			void SetPosition(glm::vec3 position);
@@ -66,10 +75,13 @@ namespace game {
 			void SetParent(SceneNode * parent);
 			void RemoveChild(SceneNode * node);
 			void RemoveParent();
+
 			// Recursively grab the subtree with root this
 			std::vector<SceneNode *> *BuildNodeSubTree(std::vector<SceneNode *> *buildTree);
 
 		protected:
+			glm::vec3 forward_ = glm::vec3(0.0, 0.0, -1.0);
+			glm::vec3 side_ = glm::vec3(1.0, 0.0, 0.0);
 			glm::vec3 position_; // Position of node
 			glm::quat orientation_; // Orientation of node
 			glm::vec3 scale_; // Scale of node
