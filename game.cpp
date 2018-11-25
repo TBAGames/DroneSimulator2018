@@ -30,6 +30,8 @@ int movement_degree_up = 0;
 glm::vec3 camera_position_g(0.5, 0.5, 10.0);
 glm::vec3 camera_look_at_g(0.0, 0.0, 0.0);
 glm::vec3 camera_up_g(0.0, 1.0, 0.0);
+bool camswitch = false;
+int camview = 0;
 
 // Materials 
 const std::string material_directory_g = MATERIAL_DIRECTORY;
@@ -205,10 +207,12 @@ void Game::SetupScene(void){
     // Adjust the instance
     cube->Scale(glm::vec3(0.7, 0.7, 0.7));
     glm::quat cube_rotation = glm::angleAxis(-45.0f * -glm::pi<float>()/180.0f, glm::vec3(1.0, 0.0, 0.0));
-   // cube->Pitch(-45.0f * -glm::pi<float>() / 180.0f);
+    //cube->Pitch(-45.0f * -glm::pi<float>() / 180.0f);
     cube_rotation = glm::angleAxis(-45.0f * -glm::pi<float>()/180.0f, glm::vec3(0.0, 1.0, 0.0));
     //cube->Yaw(-45.0f * -glm::pi<float>() / 180.0f);
     cube->Translate(glm::vec3(0.0, 0.0, -1.0));
+
+
 }
 
 
@@ -261,10 +265,10 @@ void Game::MainLoop(void){
                 //node->Rotate(rotation);
 
                 // Animate the cube
-				glm::vec3 offset_from_player = glm::vec3(1.0, 1.0, -10.0);
+				//glm::vec3 offset_from_player = glm::vec3(1.0, 1.0, -10.0);
                 node = scene_.GetNode("CubeInstance1");
 				node->Pitch(rotation_factor*rotation_degree_pitch);
-				camera_.Translate(node->GetPosition() - camera_.GetPosition());
+				//camera_.Translate(node->GetPosition() - camera_.GetPosition());
 				camera_.Pitch(rotation_factor*rotation_degree_pitch);
 				node->Yaw(rotation_factor*rotation_degree_yaw);
 				camera_.Yaw(rotation_factor*rotation_degree_yaw);
@@ -278,7 +282,29 @@ void Game::MainLoop(void){
                 //node->Rotate(rotation);
                 //rotation = glm::angleAxis(2.0f * glm::pi<float>()/180.0f, glm::vec3(1.0, 0.0, 0.0));
                 //node->Rotate(rotation);
+				//void Camera::SetView(glm::vec3 position, glm::vec3 look_at, glm::vec3 up){
 
+				if (camswitch == true)
+				{
+					if (camview == 0)
+					{
+						camview = 1;
+					}
+					else 
+					{
+						camview = 0;
+					}
+					camswitch = false;
+				}
+
+				if (camview == 0)
+				{
+					camera_.SetView((-10.0f)*glm::normalize(node->GetForward()) + node->GetPosition() + glm::normalize(node->GetUp()), node->GetPosition() - (-10.0f)*glm::normalize(node->GetForward()), node->GetUp());
+				}
+				else 
+				{
+					camera_.SetView((-3.0f)*glm::normalize(node->GetForward()) + node->GetPosition() + glm::normalize(node->GetUp()), node->GetPosition() - (-3.0f)*glm::normalize(node->GetForward()), node->GetUp());
+				}
 
                 last_time = current_time;
             }
@@ -315,43 +341,46 @@ void Game::KeyCallback(GLFWwindow* window, int key, int scancode, int action, in
     // View control
     float rot_factor(glm::pi<float>() / 180);
     float trans_factor = 1.0;
-    if (key == GLFW_KEY_UP){
+    if (key == GLFW_KEY_UP && action == GLFW_PRESS){
         //game->camera_.Pitch(rot_factor);
 		rotation_degree_pitch += 1;
     }
-    if (key == GLFW_KEY_DOWN){
+    if (key == GLFW_KEY_DOWN && action == GLFW_PRESS){
         //game->camera_.Pitch(-rot_factor);
 		rotation_degree_pitch -= 1;
     }
-    if (key == GLFW_KEY_LEFT){
+    if (key == GLFW_KEY_LEFT && action == GLFW_PRESS){
         //game->camera_.Yaw(rot_factor);
 		rotation_degree_yaw += 1;
     }
-    if (key == GLFW_KEY_RIGHT){
+    if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS){
         //game->camera_.Yaw(-rot_factor);
 		rotation_degree_yaw -= 1;
     }
-    if (key == GLFW_KEY_X){
+    if (key == GLFW_KEY_X && action == GLFW_PRESS){
         //game->camera_.Roll(rot_factor);
 		rotation_degree_roll += 1;
     }
-    if (key == GLFW_KEY_Z){
+    if (key == GLFW_KEY_Z && action == GLFW_PRESS){
        // game->camera_.Translate(-game->camera_.GetForward()*trans_factor);
 		rotation_degree_roll -= 1;
     }
-	if (key == GLFW_KEY_S) {
+	if (key == GLFW_KEY_S && action == GLFW_PRESS) {
 		//game->camera_.Roll(-rot_factor);
 		movement_degree_fwd += 1;
 	}
-	if (key == GLFW_KEY_A) {
+	if (key == GLFW_KEY_A && action == GLFW_PRESS) {
 		//game->camera_.Translate(game->camera_.GetForward()*trans_factor);
 		movement_degree_fwd -= 1;
 	}
-	if (key == GLFW_KEY_E) {
+	if (key == GLFW_KEY_E && action == GLFW_PRESS) {
 		movement_degree_up += 1;
 	}
-	if (key == GLFW_KEY_W) {
+	if (key == GLFW_KEY_W && action == GLFW_PRESS) {
 		movement_degree_up -= 1;
+	}
+	if (key == GLFW_KEY_M && action == GLFW_PRESS) {
+		camswitch = true;
 	}
     if (key == GLFW_KEY_J){
         game->camera_.Translate(-game->camera_.GetSide()*trans_factor);
