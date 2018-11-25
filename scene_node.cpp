@@ -77,7 +77,6 @@ glm::vec3 SceneNode::GetPosition(void) const {
     return position_;
 }
 
-
 glm::quat SceneNode::GetOrientation(void) const {
 
     return orientation_;

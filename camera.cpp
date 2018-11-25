@@ -201,24 +201,19 @@ void Camera::SetupViewMatrix(void){
 
 void Camera::SwitchCameraMode(void) {
 
+	SceneNode *ship = GetChild("Ship");
+
 	if (camera_mode_ == CameraMode::FIRST_PERSON) {
 		camera_mode_ = CameraMode::THIRD_PERSON;
 
+		//glm::vec3 newView = glm::vec3((-10.0f)*glm::normalize(ship->GetForward()) + ship->GetPosition() + glm::normalize(ship->GetUp()), ship->GetPosition() - (-10.0f)*glm::normalize(ship->GetForward()), ship->GetUp());
+		//SetView(-10.0f)
 	}
 	else {
 		camera_mode_ = CameraMode::FIRST_PERSON;
 	}
 
-	RepositionTetheredChild(GetChild("Ship"));
-}
-
-void Camera::RepositionTetheredChild(SceneNode * child) {
-	if (camera_mode_ == CameraMode::THIRD_PERSON) {
-		child->SetPosition(THIRD_PERSON_CHILD_POSITION_OFFSET);
-	}
-	else {
-		child->SetPosition(FIRST_PERSON_CHILD_POSITION_OFFSET);
-	}
+	//RepositionTetheredChild(GetChild("Ship"));
 }
 
 } // namespace game

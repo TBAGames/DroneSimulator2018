@@ -155,6 +155,8 @@ void Game::SetupScene(void){
 	// Create Ship
 	game::SceneNode *ship = CreateAsteroidInstance("Ship", "CubeMesh", "ShinyBlueMaterial");
 	camera_.SwitchCameraMode();
+	//camera_.SetCameraMode(CameraMode::FirstPerson);
+	//camera->SetPosition(FIRST_PERSON_CHILD_OFFSET);
 
  //   // Create an instance of the turret
 	game::SceneNode *turretBase = CreateInstance("TurretBase", "TurretMesh", "TexturedMaterial", "Crystal");
