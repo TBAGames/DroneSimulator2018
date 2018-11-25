@@ -53,76 +53,6 @@ void Camera::Rotate(glm::quat rot){
     orientation_ = glm::normalize(orientation_);
 }*/
 
-
-glm::vec3 Camera::GetForward(void) const {
-
-    glm::vec3 current_forward = orientation_ * forward_;
-    return -current_forward; // Return -forward since the camera coordinate system points in the opposite direction
-}
-
-
-glm::vec3 Camera::GetSide(void) const {
-
-    glm::vec3 current_side = orientation_ * side_;
-    return current_side;
-}
-
-
-glm::vec3 Camera::GetUp(void) const {
-
-    glm::vec3 current_forward = orientation_ * forward_;
-    glm::vec3 current_side = orientation_ * side_;
-    glm::vec3 current_up = glm::cross(current_forward, current_side);
-    current_up = glm::normalize(current_up);
-    return current_up;
-}
-
-
-void Camera::Pitch(float angle){
-
-    glm::quat rotation = glm::angleAxis(angle, GetSide());
-    orientation_ = rotation * orientation_;
-    orientation_ = glm::normalize(orientation_);
-	
-	for (int i=0; i<children_.size(); i++) {
-		glm::vec3 offset_vec = children_.at(i)->GetPosition() - GetPosition();
-		glm::vec3 translation = qrot(rotation, offset_vec);
-		children_.at(i)->Translate(translation);
-		children_.at(i)->SetOrientation(orientation_);
-	}
-}
-
-
-void Camera::Yaw(float angle){
-
-    glm::quat rotation = glm::angleAxis(angle, GetUp());
-    orientation_ = rotation * orientation_;
-    orientation_ = glm::normalize(orientation_);
-
-	for (int i = 0; i<children_.size(); i++) {
-		glm::vec3 offset_vec = children_.at(i)->GetPosition() - GetPosition();
-		glm::vec3 translation = qrot(rotation, offset_vec);
-		children_.at(i)->Translate(translation);
-		children_.at(i)->SetOrientation(orientation_);
-	}
-}
-
-
-void Camera::Roll(float angle){
-
-    glm::quat rotation = glm::angleAxis(angle, GetForward());
-    orientation_ = rotation * orientation_;
-    orientation_ = glm::normalize(orientation_);
-
-	for (int i = 0; i<children_.size(); i++) {
-		glm::vec3 offset_vec = children_.at(i)->GetPosition() - GetPosition();
-		glm::vec3 translation = qrot(rotation, offset_vec);
-		children_.at(i)->Translate(translation);
-		children_.at(i)->SetOrientation(orientation_);
-	}
-}
-
-
 void Camera::SetView(glm::vec3 position, glm::vec3 look_at, glm::vec3 up){
 
     // Store initial forward and side vectors
@@ -206,11 +136,13 @@ void Camera::SwitchCameraMode(void) {
 	if (camera_mode_ == CameraMode::FIRST_PERSON) {
 		camera_mode_ = CameraMode::THIRD_PERSON;
 
-		//glm::vec3 newView = glm::vec3((-10.0f)*glm::normalize(ship->GetForward()) + ship->GetPosition() + glm::normalize(ship->GetUp()), ship->GetPosition() - (-10.0f)*glm::normalize(ship->GetForward()), ship->GetUp());
+		SetView((-10.0f)*glm::normalize(ship->GetForward()) + ship->GetPosition() + glm::normalize(ship->GetUp()), ship->GetPosition() - (-10.0f)*glm::normalize(ship->GetForward()), ship->GetUp());
 		//SetView(-10.0f)
 	}
 	else {
 		camera_mode_ = CameraMode::FIRST_PERSON;
+
+		SetView((-3.0f)*glm::normalize(ship->GetForward()) + ship->GetPosition() + glm::normalize(ship->GetUp()), ship->GetPosition() - (-3.0f)*glm::normalize(ship->GetForward()), ship->GetUp());
 	}
 
 	//RepositionTetheredChild(GetChild("Ship"));

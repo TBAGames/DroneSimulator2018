@@ -62,6 +62,16 @@ namespace game {
 			// Rotate vectors with quaternions
 			glm::vec3 qrot(glm::quat q, glm::vec3 v);
 
+			// Get relative attributes of camera
+			glm::vec3 GetForward(void) const;
+			glm::vec3 GetSide(void) const;
+			glm::vec3 GetUp(void) const;
+
+			// Perform relative transformations of camera
+			void Pitch(float angle);
+			void Yaw(float angle);
+			void Roll(float angle);
+
 			// Manage hierarchy
 			std::vector<SceneNode *> GetChildren();
 			SceneNode *GetParent();
@@ -78,6 +88,9 @@ namespace game {
 			glm::vec3 position_; // Position of node
 			glm::quat orientation_; // Orientation of node
 			glm::vec3 scale_; // Scale of node
+
+			glm::vec3 forward_ = glm::vec3(0.0, 0.0, -1.0); // Initial forward vector
+			glm::vec3 side_ = glm::vec3(1.0, 0.0, 0.0); // Initial side vector
 
 			SceneNode *parent_;
 			std::vector<SceneNode *> children_;

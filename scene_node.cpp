@@ -160,6 +160,75 @@ void SceneNode::Scale(glm::vec3 scale){
     scale_ *= scale;
 }
 
+glm::vec3 SceneNode::GetForward(void) const {
+
+	glm::vec3 current_forward = orientation_ * forward_;
+	return -current_forward; // Return -forward since the camera coordinate system points in the opposite direction
+}
+
+
+glm::vec3 SceneNode::GetSide(void) const {
+
+	glm::vec3 current_side = orientation_ * side_;
+	return current_side;
+}
+
+
+glm::vec3 SceneNode::GetUp(void) const {
+
+	glm::vec3 current_forward = orientation_ * forward_;
+	glm::vec3 current_side = orientation_ * side_;
+	glm::vec3 current_up = glm::cross(current_forward, current_side);
+	current_up = glm::normalize(current_up);
+	return current_up;
+}
+
+
+void SceneNode::Pitch(float angle) {
+
+	glm::quat rotation = glm::angleAxis(angle, GetSide());
+	orientation_ = rotation * orientation_;
+	orientation_ = glm::normalize(orientation_);
+
+	for (int i = 0; i<children_.size(); i++) {
+		glm::vec3 offset_vec = children_.at(i)->GetPosition() - GetPosition();
+		glm::vec3 translation = qrot(rotation, offset_vec);
+		children_.at(i)->Translate(translation);
+		children_.at(i)->SetOrientation(orientation_);
+	}
+}
+
+
+void SceneNode::Yaw(float angle) {
+
+	glm::quat rotation = glm::angleAxis(angle, GetUp());
+	orientation_ = rotation * orientation_;
+	orientation_ = glm::normalize(orientation_);
+
+	for (int i = 0; i<children_.size(); i++) {
+		glm::vec3 offset_vec = children_.at(i)->GetPosition() - GetPosition();
+		glm::vec3 translation = qrot(rotation, offset_vec);
+		children_.at(i)->Translate(translation);
+		children_.at(i)->SetOrientation(orientation_);
+	}
+}
+
+
+void SceneNode::Roll(float angle) {
+
+	glm::quat rotation = glm::angleAxis(angle, GetForward());
+	orientation_ = rotation * orientation_;
+	orientation_ = glm::normalize(orientation_);
+
+	for (int i = 0; i<children_.size(); i++) {
+		glm::vec3 offset_vec = children_.at(i)->GetPosition() - GetPosition();
+		glm::vec3 translation = qrot(rotation, offset_vec);
+		children_.at(i)->Translate(translation);
+		children_.at(i)->SetOrientation(orientation_);
+	}
+}
+
+
 // Function derived from https://code.google.com/archive/p/kri/wikis/Quaternions.wiki
 glm::vec3 SceneNode::qrot(glm::quat q, glm::vec3 v) {
 
