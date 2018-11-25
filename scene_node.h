@@ -79,18 +79,18 @@ namespace game {
 			void SetParent(SceneNode * parent);
 			void RemoveChild(SceneNode * node);
 			void RemoveParent();
+
 			SceneNode *GetChild(std::string name);
 
 			// Recursively grab the subtree with root this
 			std::vector<SceneNode *> *BuildNodeSubTree(std::vector<SceneNode *> *buildTree);
 
 		protected:
+			glm::vec3 forward_ = glm::vec3(0.0, 0.0, -1.0);
+			glm::vec3 side_ = glm::vec3(1.0, 0.0, 0.0);
 			glm::vec3 position_; // Position of node
 			glm::quat orientation_; // Orientation of node
 			glm::vec3 scale_; // Scale of node
-
-			glm::vec3 forward_ = glm::vec3(0.0, 0.0, -1.0); // Initial forward vector
-			glm::vec3 side_ = glm::vec3(1.0, 0.0, 0.0); // Initial side vector
 
 			SceneNode *parent_;
 			std::vector<SceneNode *> children_;

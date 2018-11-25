@@ -146,9 +146,6 @@ void SceneNode::Rotate(glm::quat rot){
 	//if (parent_ != NULL) {
 		for (int i = 0; i < children_.size(); i++)
 		{
-			//SceneNode * child = children_.at(i);
-			/*glm::vec3 offset = child->GetPosition() - position_;
-			glm::vec3 direction = glm::normalize(-offset);*/
 			children_.at(i)->Rotate(rot);
 		}
 	//}
@@ -282,12 +279,6 @@ void SceneNode::AddChild(SceneNode *child) {
 
 	std::cout << "Has Prev Parent? " << ((prevParent != NULL) ? "Yes" : "No") << std::endl;
 
-	// BROKEN
-	// Remove child from any other parent->child relation
-	/*if (prevParent != NULL) {
-		prevParent->RemoveChild(child);
-	}*/
-
 	// Add node to tree
 	std::cout << "Here" << std::endl;
 	child->SetParent(this);
@@ -344,31 +335,6 @@ std::vector<SceneNode *> *SceneNode::BuildNodeSubTree(std::vector<SceneNode *> *
 
 	return buildTree;
 }
-
-
-
-/*void SceneNode::Draw(Camera *camera){
-
-    // Select proper material (shader program)
-    glUseProgram(material_);
-
-    // Set geometry to draw
-    glBindBuffer(GL_ARRAY_BUFFER, array_buffer_);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_array_buffer_);
-
-    // Set globals for camera
-    camera->SetupShader(material_);
-
-    // Set world matrix and other shader input variables
-    SetupShader(material_);
-
-    // Draw geometry
-    if (mode_ == GL_POINTS){
-        glDrawArrays(mode_, 0, size_);
-    } else {
-        glDrawElements(mode_, size_, GL_UNSIGNED_INT, 0);
-    }
-}*/
 
 void SceneNode::SetupGeometry()
 {

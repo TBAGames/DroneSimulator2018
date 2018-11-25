@@ -16,43 +16,6 @@ Camera::Camera(void) : SceneNode("MainCamera") {
 Camera::~Camera(){
 }
 
-
-/*glm::vec3 Camera::GetPosition(void) const {
-
-    return position_;
-}
-
-
-glm::quat Camera::GetOrientation(void) const {
-
-    return orientation_;
-}
-
-
-void Camera::SetPosition(glm::vec3 position){
-
-    position_ = position;
-}
-
-
-void Camera::SetOrientation(glm::quat orientation){
-
-    orientation_ = orientation;
-}
-
-
-void Camera::Translate(glm::vec3 trans){
-
-    position_ += trans;
-}
-
-
-void Camera::Rotate(glm::quat rot){
-
-    orientation_ = rot * orientation_;
-    orientation_ = glm::normalize(orientation_);
-}*/
-
 void Camera::SetView(glm::vec3 position, glm::vec3 look_at, glm::vec3 up){
 
     // Store initial forward and side vectors
@@ -129,23 +92,29 @@ void Camera::SetupViewMatrix(void){
     view_matrix_ *= trans;
 }
 
+void Camera::Update(void) {
+
+	SceneNode *ship = GetChild("Ship");
+
+	if (camera_mode_ == CameraMode::FIRST_PERSON) {
+		SetView((-3.0f)*glm::normalize(ship->GetForward()) + ship->GetPosition() + glm::normalize(ship->GetUp()), ship->GetPosition() - (-3.0f)*glm::normalize(ship->GetForward()), ship->GetUp());
+	}
+	else {
+		SetView((-10.0f)*glm::normalize(ship->GetForward()) + ship->GetPosition() + glm::normalize(ship->GetUp()), ship->GetPosition() - (-10.0f)*glm::normalize(ship->GetForward()), ship->GetUp());
+	}
+}
+
+
 void Camera::SwitchCameraMode(void) {
 
 	SceneNode *ship = GetChild("Ship");
 
 	if (camera_mode_ == CameraMode::FIRST_PERSON) {
 		camera_mode_ = CameraMode::THIRD_PERSON;
-
-		SetView((-10.0f)*glm::normalize(ship->GetForward()) + ship->GetPosition() + glm::normalize(ship->GetUp()), ship->GetPosition() - (-10.0f)*glm::normalize(ship->GetForward()), ship->GetUp());
-		//SetView(-10.0f)
 	}
 	else {
 		camera_mode_ = CameraMode::FIRST_PERSON;
-
-		SetView((-3.0f)*glm::normalize(ship->GetForward()) + ship->GetPosition() + glm::normalize(ship->GetUp()), ship->GetPosition() - (-3.0f)*glm::normalize(ship->GetForward()), ship->GetUp());
 	}
-
-	//RepositionTetheredChild(GetChild("Ship"));
 }
 
 } // namespace game

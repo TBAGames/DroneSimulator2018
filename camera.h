@@ -44,6 +44,8 @@ namespace game {
 			// Swwitch between first and third person
 			void SwitchCameraMode(void);
 
+			void Update(void) override;
+
 
         private:
             //glm::vec3 position_; // Position of camera
@@ -55,8 +57,6 @@ namespace game {
             void SetupViewMatrix(void);
 
 			CameraMode camera_mode_;
-			const glm::vec3 FIRST_PERSON_CHILD_POSITION_OFFSET = glm::vec3(0.0, 0.0, 2.0);
-			const glm::vec3 THIRD_PERSON_CHILD_POSITION_OFFSET = glm::vec3(0.0, -1.5, -1.5);
 
     }; // class Camera
 
