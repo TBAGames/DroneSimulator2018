@@ -14,82 +14,94 @@
 
 namespace game {
 
-    // Class that manages one object in a scene 
-    class SceneNode {
+	// Class that manages one object in a scene 
+	class SceneNode {
 
-        public:
-            // Create scene node from given resources
-            SceneNode(const std::string name, const Resource *geometry, const Resource *material, const Resource *texture = NULL);
-			SceneNode(const std::string name);
+	public:
+		// Create scene node from given resources
+		SceneNode(const std::string name, const Resource *geometry, const Resource *material, const Resource *texture = NULL);
+		SceneNode(const std::string name);
 
-            // Destructor
-            ~SceneNode();
-            
-            // Get name of node
-            const std::string GetName(void) const;
+		// Destructor
+		~SceneNode();
 
-            // Draw the node according to scene parameters in 'camera'
-            // variable
-            //virtual void Draw(Camera *camera);
-			virtual void SetupGeometry();
-			virtual void DrawGeometry(bool toonModeOn, float roughness);
+		// Get name of node
+		const std::string GetName(void) const;
 
-            // Update the node
-            virtual void Update(void);
+		// Draw the node according to scene parameters in 'camera'
+		// variable
+		//virtual void Draw(Camera *camera);
+		virtual void SetupGeometry();
+		virtual void DrawGeometry(bool toonModeOn, float roughness);
 
-            // OpenGL variables
-            GLenum GetMode(void) const;
-            GLuint GetArrayBuffer(void) const;
-            GLuint GetElementArrayBuffer(void) const;
-            GLsizei GetSize(void) const;
-            GLuint GetMaterial(void) const;
+		// Update the node
+		virtual void Update(void);
 
-			// Perform transformations on node
-			void Translate(glm::vec3 trans);
-			void Rotate(glm::quat rot);
-			void Scale(glm::vec3 scale);
-		
-			// Set node attributes
-			void SetPosition(glm::vec3 position);
-			void SetOrientation(glm::quat orientation);
-			void SetScale(glm::vec3 scale);
+		// OpenGL variables
+		GLenum GetMode(void) const;
+		GLuint GetArrayBuffer(void) const;
+		GLuint GetElementArrayBuffer(void) const;
+		GLsizei GetSize(void) const;
+		GLuint GetMaterial(void) const;
 
-			// Get node attributes
-			glm::vec3 GetPosition(void) const;
-			glm::quat GetOrientation(void) const;
-			glm::vec3 GetScale(void) const;
+		// Perform transformations on node
+		void Translate(glm::vec3 trans);
+		void Rotate(glm::quat rot);
+		void Scale(glm::vec3 scale);
 
-			// Manage hierarchy
-			std::vector<SceneNode *> GetChildren();
-			SceneNode *GetParent();
-			void AddChild(SceneNode * child);
-			void SetParent(SceneNode * parent);
-			void RemoveChild(SceneNode * node);
-			void RemoveParent();
-			// Recursively grab the subtree with root this
-			std::vector<SceneNode *> *BuildNodeSubTree(std::vector<SceneNode *> *buildTree);
+		//The good stuff
+		glm::vec3 GetForward(void) const;
+		glm::vec3 GetSide(void) const;
+		glm::vec3 GetUp(void) const;
+		void Pitch(float angle);
+		void Yaw(float angle);
+		void Roll(float angle);
+		//Oh yes
 
-		protected:
-			glm::vec3 position_; // Position of node
-			glm::quat orientation_; // Orientation of node
-			glm::vec3 scale_; // Scale of node
+		// Set node attributes
+		void SetPosition(glm::vec3 position);
+		void SetOrientation(glm::quat orientation);
+		void SetScale(glm::vec3 scale);
 
-        private:
-            std::string name_; // Name of the scene node
-            GLuint array_buffer_; // References to geometry: vertex and array buffers
-            GLuint element_array_buffer_;
-            GLenum mode_; // Type of geometry
-            GLsizei size_; // Number of primitives in geometry
-            GLuint material_; // Reference to shader program
-            GLuint texture_; // Reference to texture resource
+		// Get node attributes
+		glm::vec3 GetPosition(void) const;
+		glm::quat GetOrientation(void) const;
+		glm::vec3 GetScale(void) const;
 
-			SceneNode *parent_;
-			std::vector<SceneNode *> children_;
+		// Manage hierarchy
+		std::vector<SceneNode *> GetChildren();
+		SceneNode *GetParent();
+		void AddChild(SceneNode * child);
+		void SetParent(SceneNode * parent);
+		void RemoveChild(SceneNode * node);
+		void RemoveParent();
 
-            // Set matrices that transform the node in a shader program
-            void SetupShader(GLuint program, bool toonModeOn, float roughness);
+		// Recursively grab the subtree with root this
+		std::vector<SceneNode *> *BuildNodeSubTree(std::vector<SceneNode *> *buildTree);
 
-    }; // class SceneNode
+	protected:
+		glm::vec3 forward_ = glm::vec3(0.0, 0.0, -1.0);
+		glm::vec3 side_ = glm::vec3(1.0, 0.0, 0.0);
+		glm::vec3 position_; // Position of node
+		glm::quat orientation_; // Orientation of node
+		glm::vec3 scale_; // Scale of node
+
+	private:
+		std::string name_; // Name of the scene node
+		GLuint array_buffer_; // References to geometry: vertex and array buffers
+		GLuint element_array_buffer_;
+		GLenum mode_; // Type of geometry
+		GLsizei size_; // Number of primitives in geometry
+		GLuint material_; // Reference to shader program
+		GLuint texture_; // Reference to texture resource
+
+		SceneNode *parent_;
+		std::vector<SceneNode *> children_;
+
+		// Set matrices that transform the node in a shader program
+		void SetupShader(GLuint program, bool toonModeOn, float roughness);
+
+	}; // class SceneNode
 
 } // namespace game
 
