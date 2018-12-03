@@ -15,15 +15,23 @@ const std::string window_title_g = "Demo";
 const unsigned int window_width_g = 800;
 const unsigned int window_height_g = 600;
 const bool window_full_screen_g = false;
+const float rotation_factor = glm::pi<float>() / 360;
 
 // Viewport and camera settings
 float camera_near_clip_distance_g = 0.01;
 float camera_far_clip_distance_g = 1000.0;
 float camera_fov_g = 25.0; // Field-of-view of camera
 const glm::vec3 viewport_background_color_g(0.6, 0.0, 0.0);
+int rotation_degree_pitch = 0;
+int rotation_degree_yaw = 0;
+int rotation_degree_roll = 0;
+int movement_degree_fwd = 0;
+int movement_degree_up = 0;
 glm::vec3 camera_position_g(0.5, 0.5, 10.0);
 glm::vec3 camera_look_at_g(0.0, 0.0, 0.0);
 glm::vec3 camera_up_g(0.0, 1.0, 0.0);
+bool camswitch = false;
+int camview = 0;
 
 // Materials 
 const std::string material_directory_g = MATERIAL_DIRECTORY;
@@ -152,6 +160,12 @@ void Game::SetupScene(void){
     // Set background color for the scene
     scene_.SetBackgroundColor(viewport_background_color_g);
 
+	// Create Ship
+	game::SceneNode *ship = CreateAsteroidInstance("Ship", "CubeMesh", "ShinyBlueMaterial");
+	camera_.SwitchCameraMode();
+	//camera_.SetCameraMode(CameraMode::FirstPerson);
+	//camera->SetPosition(FIRST_PERSON_CHILD_OFFSET);
+
  //   // Create an instance of the turret
 	game::SceneNode *turretBase = CreateInstance("TurretBase", "TurretMesh", "TexturedMaterial", "Crystal");
 	game::SceneNode *turretHead = CreateInstance("TurretHead", "TurretMesh", "TexturedMaterial", "Nebula");
@@ -159,7 +173,6 @@ void Game::SetupScene(void){
 	game::SceneNode *cannonHead = CreateInstance("CannonHead", "TurretMesh", "TexturedMaterial", "Nebula");
 
 	// Turret Hierarchy
-	camera_.AddChild(turretBase);
 	turretBase->AddChild(turretHead);
 	turretHead->AddChild(cannonBase);
 	cannonBase->AddChild(cannonHead);
@@ -199,10 +212,12 @@ void Game::SetupScene(void){
     // Adjust the instance
     cube->Scale(glm::vec3(0.7, 0.7, 0.7));
     glm::quat cube_rotation = glm::angleAxis(-45.0f * -glm::pi<float>()/180.0f, glm::vec3(1.0, 0.0, 0.0));
-    cube->Rotate(cube_rotation);
+    //cube->Pitch(-45.0f * -glm::pi<float>() / 180.0f);
     cube_rotation = glm::angleAxis(-45.0f * -glm::pi<float>()/180.0f, glm::vec3(0.0, 1.0, 0.0));
-    cube->Rotate(cube_rotation);
-    cube->Translate(glm::vec3(1.4, 0.0, 0.0));
+    //cube->Yaw(-45.0f * -glm::pi<float>() / 180.0f);
+    cube->Translate(glm::vec3(0.0, 0.0, -1.0));
+
+
 }
 
 
@@ -245,21 +260,20 @@ void Game::MainLoop(void){
             static double last_time = 0;
             double current_time = glfwGetTime();
             if ((current_time - last_time) > 0.01){
-                //scene_.Update();
 
                 // Animate the turret
 				SceneNode *node;
 				glm::quat rotation;
-				//node = scene_.GetNode("TurretBase");
-                //rotation = glm::angleAxis(glm::pi<float>()/180.0f, glm::vec3(0.0, 1.0, 0.0));
-                //node->Rotate(rotation);
 
-                // Animate the cube
-                node = scene_.GetNode("CubeInstance1");
-                rotation = glm::angleAxis(glm::pi<float>()/180.0f, glm::vec3(0.0, 0.0, 1.0));
-                node->Rotate(rotation);
-                rotation = glm::angleAxis(2.0f * glm::pi<float>()/180.0f, glm::vec3(1.0, 0.0, 0.0));
-                node->Rotate(rotation);
+                // Animate the ship
+                node = scene_.GetNode("Ship");
+				node->Pitch(rotation_factor*rotation_degree_pitch);
+				node->Yaw(rotation_factor*rotation_degree_yaw);
+				node->Roll(rotation_factor*rotation_degree_roll);
+				node->Translate((node->GetForward()/100.0f) * float(movement_degree_fwd));
+				node->Translate((node->GetUp() / 100.0f) * float(movement_degree_up));
+
+				camera_.Update();
 
                 last_time = current_time;
             }
@@ -296,30 +310,47 @@ void Game::KeyCallback(GLFWwindow* window, int key, int scancode, int action, in
     // View control
     float rot_factor(glm::pi<float>() / 180);
     float trans_factor = 1.0;
-    if (key == GLFW_KEY_UP){
-        game->camera_.Pitch(rot_factor);
+    if (key == GLFW_KEY_UP && action == GLFW_PRESS){
+        //game->camera_.Pitch(rot_factor);
+		rotation_degree_pitch += 1;
     }
-    if (key == GLFW_KEY_DOWN){
-        game->camera_.Pitch(-rot_factor);
+    if (key == GLFW_KEY_DOWN && action == GLFW_PRESS){
+        //game->camera_.Pitch(-rot_factor);
+		rotation_degree_pitch -= 1;
     }
-    if (key == GLFW_KEY_LEFT){
-        game->camera_.Yaw(rot_factor);
+    if (key == GLFW_KEY_LEFT && action == GLFW_PRESS){
+        //game->camera_.Yaw(rot_factor);
+		rotation_degree_yaw += 1;
     }
-    if (key == GLFW_KEY_RIGHT){
-        game->camera_.Yaw(-rot_factor);
+    if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS){
+        //game->camera_.Yaw(-rot_factor);
+		rotation_degree_yaw -= 1;
     }
-    if (key == GLFW_KEY_S){
-        game->camera_.Roll(-rot_factor);
+    if (key == GLFW_KEY_X && action == GLFW_PRESS){
+        //game->camera_.Roll(rot_factor);
+		rotation_degree_roll += 1;
     }
-    if (key == GLFW_KEY_X){
-        game->camera_.Roll(rot_factor);
+    if (key == GLFW_KEY_Z && action == GLFW_PRESS){
+       // game->camera_.Translate(-game->camera_.GetForward()*trans_factor);
+		rotation_degree_roll -= 1;
     }
-    if (key == GLFW_KEY_A){
-        game->camera_.Translate(game->camera_.GetForward()*trans_factor);
-    }
-    if (key == GLFW_KEY_Z){
-        game->camera_.Translate(-game->camera_.GetForward()*trans_factor);
-    }
+	if (key == GLFW_KEY_S && action == GLFW_PRESS) {
+		//game->camera_.Roll(-rot_factor);
+		movement_degree_fwd += 1;
+	}
+	if (key == GLFW_KEY_A && action == GLFW_PRESS) {
+		//game->camera_.Translate(game->camera_.GetForward()*trans_factor);
+		movement_degree_fwd -= 1;
+	}
+	if (key == GLFW_KEY_E && action == GLFW_PRESS) {
+		movement_degree_up += 1;
+	}
+	if (key == GLFW_KEY_W && action == GLFW_PRESS) {
+		movement_degree_up -= 1;
+	}
+	if (key == GLFW_KEY_M && action == GLFW_PRESS) {
+		camswitch = true;
+	}
     if (key == GLFW_KEY_J){
         game->camera_.Translate(-game->camera_.GetSide()*trans_factor);
     }
@@ -340,6 +371,9 @@ void Game::KeyCallback(GLFWwindow* window, int key, int scancode, int action, in
 	}
 	if (key == GLFW_KEY_9 && action == GLFW_PRESS) {
 		game->DecrementSurfaceRoughness();
+	}
+	if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
+		game->GetCamera()->SwitchCameraMode();
 	}
 }
 
@@ -375,7 +409,8 @@ Asteroid *Game::CreateAsteroidInstance(std::string entity_name, std::string obje
 
     // Create asteroid instance
     Asteroid *ast = new Asteroid(entity_name, geom, mat);
-    scene_.AddNode(ast);
+	scene_.AddNode(ast);
+    camera_.AddChild(ast);
     return ast;
 }
 
@@ -425,8 +460,12 @@ SceneNode *Game::CreateInstance(std::string entity_name, std::string object_name
     SceneNode *scn = scene_.CreateNode(entity_name, geom, mat, tex);
 
 	//By default, add new node to scene
-	camera_.AddChild(scn);
+	scene_.AddNode(scn);
     return scn;
+}
+
+Camera *Game::GetCamera() {
+	return &camera_;
 }
 
 } // namespace game

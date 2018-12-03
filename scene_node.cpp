@@ -77,7 +77,6 @@ glm::vec3 SceneNode::GetPosition(void) const {
     return position_;
 }
 
-
 glm::quat SceneNode::GetOrientation(void) const {
 
     return orientation_;
@@ -130,13 +129,13 @@ void SceneNode::Translate(glm::vec3 trans){
 	
     position_ += trans;
 
-	if (parent_ != NULL) {
+	//if (parent_ != NULL) {
 		for (int i = 0; i < children_.size(); i++)
 		{
 			//std::cout << "Children of " << this->GetName() << ": " << std::endl;
 			children_.at(i)->Translate(trans);
 		}
-	}
+	//}
 }
 
 void SceneNode::Rotate(glm::quat rot){
@@ -144,15 +143,12 @@ void SceneNode::Rotate(glm::quat rot){
     orientation_ *= rot;
     orientation_ = glm::normalize(orientation_);
 
-	if (parent_ != NULL) {
+	//if (parent_ != NULL) {
 		for (int i = 0; i < children_.size(); i++)
 		{
-			SceneNode * child = children_.at(i);
-			/*glm::vec3 offset = child->GetPosition() - position_;
-			glm::vec3 direction = glm::normalize(-offset);*/
-			child->Rotate(rot);
+			children_.at(i)->Rotate(rot);
 		}
-	}
+	//}
 }
 
 
@@ -161,6 +157,81 @@ void SceneNode::Scale(glm::vec3 scale){
     scale_ *= scale;
 }
 
+glm::vec3 SceneNode::GetForward(void) const {
+
+	glm::vec3 current_forward = orientation_ * forward_;
+	return -current_forward; // Return -forward since the camera coordinate system points in the opposite direction
+}
+
+
+glm::vec3 SceneNode::GetSide(void) const {
+
+	glm::vec3 current_side = orientation_ * side_;
+	return current_side;
+}
+
+
+glm::vec3 SceneNode::GetUp(void) const {
+
+	glm::vec3 current_forward = orientation_ * forward_;
+	glm::vec3 current_side = orientation_ * side_;
+	glm::vec3 current_up = glm::cross(current_forward, current_side);
+	current_up = glm::normalize(current_up);
+	return current_up;
+}
+
+
+void SceneNode::Pitch(float angle) {
+
+	glm::quat rotation = glm::angleAxis(angle, GetSide());
+	orientation_ = rotation * orientation_;
+	orientation_ = glm::normalize(orientation_);
+
+	for (int i = 0; i<children_.size(); i++) {
+		glm::vec3 offset_vec = children_.at(i)->GetPosition() - GetPosition();
+		glm::vec3 translation = qrot(rotation, offset_vec);
+		children_.at(i)->Translate(translation);
+		children_.at(i)->SetOrientation(orientation_);
+	}
+}
+
+
+void SceneNode::Yaw(float angle) {
+
+	glm::quat rotation = glm::angleAxis(angle, GetUp());
+	orientation_ = rotation * orientation_;
+	orientation_ = glm::normalize(orientation_);
+
+	for (int i = 0; i<children_.size(); i++) {
+		glm::vec3 offset_vec = children_.at(i)->GetPosition() - GetPosition();
+		glm::vec3 translation = qrot(rotation, offset_vec);
+		children_.at(i)->Translate(translation);
+		children_.at(i)->SetOrientation(orientation_);
+	}
+}
+
+
+void SceneNode::Roll(float angle) {
+
+	glm::quat rotation = glm::angleAxis(angle, GetForward());
+	orientation_ = rotation * orientation_;
+	orientation_ = glm::normalize(orientation_);
+
+	for (int i = 0; i<children_.size(); i++) {
+		glm::vec3 offset_vec = children_.at(i)->GetPosition() - GetPosition();
+		glm::vec3 translation = qrot(rotation, offset_vec);
+		children_.at(i)->Translate(translation);
+		children_.at(i)->SetOrientation(orientation_);
+	}
+}
+
+
+// Function derived from https://code.google.com/archive/p/kri/wikis/Quaternions.wiki
+glm::vec3 SceneNode::qrot(glm::quat q, glm::vec3 v) {
+
+	glm::vec4 qv = glm::vec4(q.x, q.y, q.z, q.w);
+	return 2.0f*glm::cross(glm::vec3(qv), glm::cross(glm::vec3(qv), v) + q.w*v);
+}
 
 GLenum SceneNode::GetMode(void) const {
 
@@ -208,12 +279,6 @@ void SceneNode::AddChild(SceneNode *child) {
 
 	std::cout << "Has Prev Parent? " << ((prevParent != NULL) ? "Yes" : "No") << std::endl;
 
-	// BROKEN
-	// Remove child from any other parent->child relation
-	/*if (prevParent != NULL) {
-		prevParent->RemoveChild(child);
-	}*/
-
 	// Add node to tree
 	std::cout << "Here" << std::endl;
 	child->SetParent(this);
@@ -232,12 +297,25 @@ void SceneNode::SetParent(SceneNode *parent) {
 }
 
 void SceneNode::RemoveChild(SceneNode * node) {
+
 	for (int i = 0; i < children_.size(); i++) {
 		SceneNode *child;
 		if ((child = children_.at(i)) == node) {
 			children_.erase(children_.begin() + i);
 			child->RemoveParent();
 			return;
+		}
+	}
+}
+
+SceneNode *SceneNode::GetChild(std::string name) {
+	
+	SceneNode * child;
+
+	for (int i = 0; i < children_.size(); i++)
+	{
+		if ((child = children_.at(i))->GetName() == name) {
+			return child;
 		}
 	}
 }
@@ -257,31 +335,6 @@ std::vector<SceneNode *> *SceneNode::BuildNodeSubTree(std::vector<SceneNode *> *
 
 	return buildTree;
 }
-
-
-
-/*void SceneNode::Draw(Camera *camera){
-
-    // Select proper material (shader program)
-    glUseProgram(material_);
-
-    // Set geometry to draw
-    glBindBuffer(GL_ARRAY_BUFFER, array_buffer_);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_array_buffer_);
-
-    // Set globals for camera
-    camera->SetupShader(material_);
-
-    // Set world matrix and other shader input variables
-    SetupShader(material_);
-
-    // Draw geometry
-    if (mode_ == GL_POINTS){
-        glDrawArrays(mode_, 0, size_);
-    } else {
-        glDrawElements(mode_, size_, GL_UNSIGNED_INT, 0);
-    }
-}*/
 
 void SceneNode::SetupGeometry()
 {

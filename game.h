@@ -47,6 +47,9 @@ namespace game {
 			void IncrementSurfaceRoughness(void);
 			void DecrementSurfaceRoughness(void);
 
+			// Get camera
+			Camera *GetCamera(void);
+
 
         private:
             // GLFW window

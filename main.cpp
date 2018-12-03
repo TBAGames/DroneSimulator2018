@@ -11,6 +11,7 @@
 #include <exception>
 #include "game.h"
 
+
 // Macro for printing exceptions
 #define PrintException(exception_object)\
 	std::cerr << exception_object.what() << std::endl
