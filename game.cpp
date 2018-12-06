@@ -1,7 +1,7 @@
 #include <iostream>
 #include <time.h>
 #include <sstream>
-
+#include "bird.h"
 #include "game.h"
 #include "bin/path_config.h"
 
@@ -15,7 +15,7 @@ const std::string window_title_g = "Demo";
 const unsigned int window_width_g = 800;
 const unsigned int window_height_g = 600;
 const bool window_full_screen_g = false;
-const float rotation_factor = glm::pi<float>() / 360;
+const float rotation_factor = glm::pi<float>() / 200;
 
 // Viewport and camera settings
 float camera_near_clip_distance_g = 0.01;
@@ -171,6 +171,7 @@ void Game::SetupScene(void){
 	game::SceneNode *turretHead = CreateInstance("TurretHead", "TurretMesh", "TexturedMaterial", "Nebula");
 	game::SceneNode *cannonBase = CreateInstance("CannonBase", "TurretMesh", "TexturedMaterial", "Crystal");
 	game::SceneNode *cannonHead = CreateInstance("CannonHead", "TurretMesh", "TexturedMaterial", "Nebula");
+	//bird *birdtest = CreateInstance("CannonHead", "TurretMesh", "TexturedMaterial", "Nebula");
 
 	// Turret Hierarchy
 	turretBase->AddChild(turretHead);
@@ -197,11 +198,16 @@ void Game::SetupScene(void){
 	game::SceneNode *torus = CreateInstance("TorusInstance1", "TorusMesh", "ShinyBlueMaterial");
 	torus->Translate(glm::vec3(-1.5, -1.5, 0.0));
 
+	//createbirb
+	game::SceneNode *bird = CreateBirdInstance("bird", "CubeMesh", "ShinyBlueMaterial","Crystal", glm::vec3(0.0f, -50.0f, 0.0f), ship);
+	//bird *Game::CreateBirdInstance(std::string entity_name, std::string object_name, std::string material_name, std::string texture_name, glm::vec3 origin_point, SceneNode *player) {
+
+
 	//std::cout << "Position Diff Before: " << glm::length(turretHead->GetPosition() - turretBase->GetPosition()) << std::endl;
 	//turretBase->Translate(glm::vec3(-0.5, 0.0, 0.0));
 	//std::cout << "Position Diff After: " << glm::length(turretHead->GetPosition() - turretBase->GetPosition()) << std::endl;
 	
-	//glm::quat turret_rotation = glm::angleAxis(-90.0f * -glm::pi<float>() / 180.0f, glm::vec3(1.0, 0.0, 0.0));
+	glm::quat turret_rotation = glm::angleAxis(-90.0f * -glm::pi<float>() / 180.0f, glm::vec3(1.0, 0.0, 0.0));
 	//turret->Rotate(turret_rotation);
     //turret->Translate(glm::vec3(-1.4, 0.0, 0.0));
 
@@ -263,6 +269,7 @@ void Game::MainLoop(void){
 
                 // Animate the turret
 				SceneNode *node;
+				bird *birb;
 				glm::quat rotation;
 
                 // Animate the ship
@@ -273,6 +280,9 @@ void Game::MainLoop(void){
 				node->Translate((node->GetForward()/100.0f) * float(movement_degree_fwd));
 				node->Translate((node->GetUp() / 100.0f) * float(movement_degree_up));
 
+				node = scene_.GetNode("bird");
+				birb = (bird*)node;
+				birb->beHAVE();
 				camera_.Update();
 
                 last_time = current_time;
@@ -413,6 +423,34 @@ Asteroid *Game::CreateAsteroidInstance(std::string entity_name, std::string obje
     camera_.AddChild(ast);
     return ast;
 }
+//const std::string name, const game::Resource *geometry, const game::Resource *material, const game::Resource *texture, glm::vec3 originPoint, game::SceneNode *play
+bird *Game::CreateBirdInstance(std::string entity_name, std::string object_name, std::string material_name, std::string texture_name, glm::vec3 origin_point, SceneNode *player) {
+
+	// Get resources
+	Resource *geom = resman_.GetResource(object_name);
+	if (!geom) {
+		throw(GameException(std::string("Could not find resource \"") + object_name + std::string("\"")));
+	}
+
+	Resource *mat = resman_.GetResource(material_name);
+	if (!mat) {
+		throw(GameException(std::string("Could not find resource \"") + material_name + std::string("\"")));
+	}
+
+	Resource *tex = NULL;
+	if (texture_name != "") {
+		tex = resman_.GetResource(texture_name);
+		if (!mat) {
+			throw(GameException(std::string("Could not find resource \"") + material_name + std::string("\"")));
+		}
+	}
+
+	// Create asteroid instance
+	bird *ast = new bird(entity_name, geom, mat, tex, origin_point, player);
+	scene_.AddNode(ast);
+	camera_.AddChild(ast);
+	return ast;
+}
 
 
 void Game::CreateAsteroidField(int num_asteroids){
@@ -463,6 +501,8 @@ SceneNode *Game::CreateInstance(std::string entity_name, std::string object_name
 	scene_.AddNode(scn);
     return scn;
 }
+
+
 
 Camera *Game::GetCamera() {
 	return &camera_;

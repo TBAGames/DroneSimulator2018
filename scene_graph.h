@@ -7,6 +7,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "bird.h"
 #include "scene_node.h"
 #include "resource.h"
 #include "camera.h"

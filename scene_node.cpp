@@ -372,8 +372,9 @@ void SceneNode::Update(void){
 }
 
 
-void SceneNode::SetupShader(GLuint program, bool toonModeOn, float roughness){
 
+void SceneNode::SetupShader(GLuint program, bool toonModeOn, float roughness){
+	 
     // Set attributes for shaders
     GLint vertex_att = glGetAttribLocation(program, "vertex");
     glVertexAttribPointer(vertex_att, 3, GL_FLOAT, GL_FALSE, 11*sizeof(GLfloat), 0);
