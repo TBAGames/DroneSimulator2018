@@ -13,6 +13,7 @@
 #include "asteroid.h"
 #include "settings.h"
 #include "Bullet.h"
+#include "Bomb.h"
 
 namespace game {
 
@@ -87,10 +88,13 @@ namespace game {
             // Create an instance of an object stored in the resource manager
             SceneNode *CreateInstance(std::string entity_name, std::string object_name, std::string material_name, std::string texture_name = std::string(""));
 
-			SceneNode *CreateInstance();
-
-			void Fire(void);
+			//Firing the machine gun
+			void FireMachineGun(void);
 			Bullet *CreateBullet(void);
+
+			//Dropping the bomb 
+			void DropBomb(void);
+			Bomb *CreateBomb(void);
 
 			// Settings
 			Settings settings_;

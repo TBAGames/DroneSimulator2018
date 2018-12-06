@@ -19,7 +19,6 @@ namespace game {
 		glm::vec3 pos = GetPosition();
 		Translate(direction_ * speed_);
 	
-
 	}
 
 } // namespace game

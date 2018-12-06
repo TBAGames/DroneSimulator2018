@@ -318,9 +318,14 @@ void Game::KeyCallback(GLFWwindow* window, int key, int scancode, int action, in
     }
 
 	//Fire the turret
-	if (key  == GLFW_KEY_O && action == GLFW_PRESS) {
-		game->Fire();
+	if (key == GLFW_KEY_O && action == GLFW_PRESS) {
+		game->FireMachineGun();
 	}
+
+	if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+		game->DropBomb();
+	}
+
 
     // View control
     float rot_factor(glm::pi<float>() / 180);
@@ -484,14 +489,25 @@ Camera *Game::GetCamera() {
 	return &camera_;
 }
 
-void Game::Fire()
+void Game::FireMachineGun()
 {
 	Bullet *bullet = CreateBullet();
 	game::SceneNode *node = scene_.GetNode("Ship");
 
-	bullet->SetPosition(node->GetPosition());
+	bullet->SetPosition(node->GetPosition() + glm::vec3(0.0, 0.0, 3.0));
 	bullet->SetOrientation(node->GetOrientation());
 	bullet->SetDir(node->GetForward());
+}
+
+void Game::DropBomb()
+{
+	Bomb *bomb = CreateBomb();
+	game::SceneNode *node = scene_.GetNode("Ship");
+
+	bomb->SetPosition((node->GetPosition()) + glm::vec3(0.0, 1.0, 0.0));
+	bomb->SetOrientation(node->GetOrientation());
+	bomb->SetDir(-(node->GetUp()));
+
 }
 
 Bullet *Game::CreateBullet()
@@ -519,5 +535,33 @@ Bullet *Game::CreateBullet()
 
 	return bullet;
 }
+
+Bomb *Game::CreateBomb()
+{
+	std::string entity_name = "Bomb";
+	std::string object_name = "CubeMesh";
+	std::string material_name = "ShinyBlueMaterial";
+
+	Resource *geom = resman_.GetResource(object_name);
+	if (!geom) {
+		throw(GameException(std::string("Could not find resource \"") + object_name + std::string("\"")));
+	}
+
+	Resource *mat = resman_.GetResource(material_name);
+	if (!mat) {
+		throw(GameException(std::string("Could not find resource \"") + material_name + std::string("\"")));
+	}
+
+	// Create ship instance
+	Bomb *bomb = new Bomb(entity_name, geom, mat);
+	//scene_.AddNode(ast);
+
+	//std::cout << "Adding laser" << std::endl;
+	scene_.AddNode(bomb);
+
+	return bomb;
+}
+
+
 
 } // namespace game
