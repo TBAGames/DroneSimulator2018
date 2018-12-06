@@ -123,18 +123,23 @@ void Game::InitEventHandlers(void){
 
 void Game::SetupResources(void){
 
+	std::string filename;
+
     // Create turret parts
     resman_.CreateCylinder("TurretMesh");
 
 	// Create torus
 	resman_.CreateTorus("TorusMesh");
 
-	//resman_.CreateSphereParticles("ParticleMesh", 1000);
+	// Load material to be applied to particles
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/particle");
+	resman_.LoadResource(Material, "ParticleMaterial", filename.c_str());
+
+	// Create particles for explosion
+	resman_.CreateSphereParticles("SphereParticles");
 
     // Load material to be applied to turret
-    //std::string filename = std::string(MATERIAL_DIRECTORY) + std::string("/three-term_shiny_blue");
-    std::string filename = std::string(MATERIAL_DIRECTORY) + std::string("/metal");
-    //std::string filename = std::string(MATERIAL_DIRECTORY) + std::string("/plastic");
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/metal");
     resman_.LoadResource(Material, "ShinyBlueMaterial", filename.c_str());
 
     // Load a cube from an obj file
@@ -163,12 +168,7 @@ void Game::SetupResources(void){
 	filename = std::string(MATERIAL_DIRECTORY) + std::string("/asphalt.png");
 	resman_.LoadResource(Texture, "Asphalt", filename.c_str());
 
-	// Load material to be applied to particles
-	filename = std::string(MATERIAL_DIRECTORY) + std::string("/particle");
-	resman_.LoadResource(Material, "ParitcleMaterial", filename.c_str());
 
-	// Create particles for explosion
-	//resman_.CreateSphereParticles("SphereParticles", 1000);
 }
 
 
@@ -231,7 +231,7 @@ void Game::SetupScene(void){
 
 
 	// Create Buildings
-	int numBuildings = 15;
+	/*int numBuildings = 1;
 	for (int i = 0; i < numBuildings; i++)
 	{
 		for (int j = 0; j < numBuildings; j++)
@@ -241,7 +241,15 @@ void Game::SetupScene(void){
 			building->SetScale(glm::vec3(5.0, 100.0, 5.0));
 			building->SetPosition(glm::vec3(100.0*(i-(int)(numBuildings/2)), 50.0, 100.0*(j-(int)(numBuildings/2))));
 		}
-	}
+	}*/
+
+	game::SceneNode *particles1 = CreateInstance("ParticleInstance1", "SphereParticles", "ParticleMaterial");
+	//game::SceneNode *particles2 = CreateInstance("ParticleInstance2", "SphereParticles", "ParticleMaterial");
+	//game::SceneNode *particles3 = CreateInstance("ParticleInstance3", "SphereParticles", "ParticleMaterial");
+
+	particles1->Translate(glm::vec3(ship->GetPosition()));
+	//particles2->Translate(ship->GetPosition() + glm::vec3(0.5, 0.5, 0.0));
+	//particles3->Translate(ship->GetPosition() + glm::vec3(-0.5, -0.5, 0.0));
 }
 
 
@@ -523,7 +531,7 @@ SceneNode *Game::CreateInstance(std::string entity_name, std::string object_name
 
     SceneNode *scn = scene_.CreateNode(entity_name, geom, mat, tex);
 
-	//By default, add new node to scene
+	//By default, add new node as a child of scene
 	scene_.AddNode(scn);
     return scn;
 }

@@ -41,7 +41,7 @@ namespace game {
 			// Create the geometry for a cube
 			void CreateCube(std::string object_name);
 			// Create the geometry for a sphere-like pattern particle
-			void CreateSphereParticles(std::string object_name, int num_particles);
+			void CreateSphereParticles(std::string object_name, int num_particles = 20000);
 
         private:
             // List storing all resources
