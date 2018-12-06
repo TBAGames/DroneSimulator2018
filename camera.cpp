@@ -101,7 +101,8 @@ void Camera::Update(void) {
 
 	if (camera_mode_ == CameraMode::FIRST_PERSON) {
 		position = ship->GetPosition() + ship->GetForward();
-		look_at = ship->GetForward();
+		look_at = ship->GetPosition() - (-1.5f)*glm::normalize(ship->GetForward());
+		//ship->getForward();
 	}
 	else {
 		position = ship->GetPosition() + (-15.0f)*ship->GetForward() + ship->GetUp()*6.0f;
@@ -110,7 +111,9 @@ void Camera::Update(void) {
 
 	SetView(position, look_at, up);
 }
-
+/*
+camera_.SetView((0.8f)*glm::normalize(node->GetForward()) + node->GetPosition(), node->GetPosition() - (-3.0f)*glm::normalize(node->GetForward()), node->GetUp());
+*/
 
 void Camera::SwitchCameraMode(void) {
 
@@ -125,3 +128,5 @@ void Camera::SwitchCameraMode(void) {
 }
 
 } // namespace game
+
+
