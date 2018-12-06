@@ -13,6 +13,7 @@ vec4 diffuse_color = vec4(0.0, 0.0, 0.5, 1.0);
 vec4 specular_color = vec4(0.8, 0.5, 0.9, 1.0);
 float phong_exponent = 128.0;
 
+
 void main() 
 {
     // Blinn-Phong shading
@@ -42,10 +43,8 @@ void main()
     float spec_angle_cos = max(dot(N, H), 0.0);
     float Is = pow(spec_angle_cos, phong_exponent);
         
-    // Compute final light value
-    vec3 lighting_result = ambient_color + Id*diffuse_color + Is*specular_color;
-	
-	gl_FragColor = lighting_result;	
+    // Assign light to the fragment
+    gl_FragColor = ambient_color + Id*diffuse_color + Is*specular_color;
                     
     // For debug, we can display the different values
     //gl_FragColor = ambient_color;

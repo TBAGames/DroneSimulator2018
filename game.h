@@ -90,6 +90,10 @@ namespace game {
 			Settings settings_;
 			bool IsToonModeOn(void);
 			float GetRoughness(void);
+
+			// Handle collisions between gameobjects
+			void CheckCollisions(void);
+			bool IsCollidingBuilding(SceneNode *ship, SceneNode *building);
 			
     }; // class Game
 
