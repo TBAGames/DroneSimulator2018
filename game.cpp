@@ -129,6 +129,8 @@ void Game::SetupResources(void){
 	// Create torus
 	resman_.CreateTorus("TorusMesh");
 
+	//resman_.CreateSphereParticles("ParticleMesh", 1000);
+
     // Load material to be applied to turret
     //std::string filename = std::string(MATERIAL_DIRECTORY) + std::string("/three-term_shiny_blue");
     std::string filename = std::string(MATERIAL_DIRECTORY) + std::string("/metal");
@@ -145,11 +147,7 @@ void Game::SetupResources(void){
 
     // Load material to be applied to the cube
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/textured_material");
-    resman_.LoadResource(Material, "TexturedMaterial", filename.c_str());
-
-	// Load building mesh from obj
-	filename = std::string(MATERIAL_DIRECTORY) + std::string("/building.obj");
-	resman_.LoadResource(Mesh, "BuildingMesh", filename.c_str());
+	resman_.LoadResource(Material, "TexturedMaterial", filename.c_str());
 
 	// Load building texture
 	filename = std::string(MATERIAL_DIRECTORY) + std::string("/building_texture.png");
@@ -164,6 +162,13 @@ void Game::SetupResources(void){
 
 	filename = std::string(MATERIAL_DIRECTORY) + std::string("/asphalt.png");
 	resman_.LoadResource(Texture, "Asphalt", filename.c_str());
+
+	// Load material to be applied to particles
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/particle");
+	resman_.LoadResource(Material, "ParitcleMaterial", filename.c_str());
+
+	// Create particles for explosion
+	//resman_.CreateSphereParticles("SphereParticles", 1000);
 }
 
 
@@ -179,7 +184,7 @@ void Game::SetupScene(void){
 	//camera->SetPosition(FIRST_PERSON_CHILD_OFFSET);
 
  //   // Create an instance of the turret
-	game::SceneNode *turretBase = CreateInstance("TurretBase", "TurretMesh", "TexturedMaterial", "Crystal");
+	/*game::SceneNode *turretBase = CreateInstance("TurretBase", "TurretMesh", "TexturedMaterial", "Crystal");
 	game::SceneNode *turretHead = CreateInstance("TurretHead", "TurretMesh", "TexturedMaterial", "Nebula");
 	game::SceneNode *cannonBase = CreateInstance("CannonBase", "TurretMesh", "TexturedMaterial", "Crystal");
 	game::SceneNode *cannonHead = CreateInstance("CannonHead", "TurretMesh", "TexturedMaterial", "Nebula");
@@ -207,7 +212,7 @@ void Game::SetupScene(void){
 
 	// Create Torus
 	game::SceneNode *torus = CreateInstance("TorusInstance1", "TorusMesh", "ShinyBlueMaterial");
-	torus->Translate(glm::vec3(-1.5, -1.5, 0.0));
+	torus->Translate(glm::vec3(-1.5, -1.5, 0.0));*/
 
     // Create an instance of the textured cube
     //game::SceneNode *cube = CreateInstance("CubeInstance1", "CubeMesh", "TexturedMaterial", "Checker");
