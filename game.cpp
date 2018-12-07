@@ -100,6 +100,7 @@ void Game::InitView(void){
 
     // Set up camera
     // Set current view
+	camera_.SwitchCameraMode();
     camera_.SetView(camera_position_g, camera_look_at_g, camera_up_g);
     // Set projection
     camera_.SetProjection(camera_fov_g, camera_near_clip_distance_g, camera_far_clip_distance_g, width, height);
@@ -132,7 +133,7 @@ void Game::SetupResources(void){
 	resman_.CreateTorus("TorusMesh");
 
 	// Load material to be applied to particles
-	filename = std::string(MATERIAL_DIRECTORY) + std::string("/particle");
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/muzzle_flash");
 	resman_.LoadResource(Material, "ParticleMaterial", filename.c_str());
 
 	// Create particles for explosion
@@ -247,7 +248,7 @@ void Game::SetupScene(void){
 	//game::SceneNode *particles2 = CreateInstance("ParticleInstance2", "SphereParticles", "ParticleMaterial");
 	//game::SceneNode *particles3 = CreateInstance("ParticleInstance3", "SphereParticles", "ParticleMaterial");
 
-	particles1->Translate(glm::vec3(ship->GetPosition()));
+	particles1->Translate(ship->GetPosition() + ship->GetForward() * 10.0f);
 	//particles2->Translate(ship->GetPosition() + glm::vec3(0.5, 0.5, 0.0));
 	//particles3->Translate(ship->GetPosition() + glm::vec3(-0.5, -0.5, 0.0));
 }
