@@ -467,6 +467,8 @@ void ResourceManager::LoadCubeMap(const std::string name, const char *filename) 
 }
 
 
+
+
 void ResourceManager::CreateCylinder(std::string object_name, float height, float radius, int num_tube_samples, int num_circle_samples) {
 
 	// Create a cylinder

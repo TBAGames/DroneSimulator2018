@@ -367,10 +367,17 @@ void SceneNode::DrawGeometry(bool toonModeOn, float roughness)
 
 
 void SceneNode::Update(void){
-
     // Do nothing for this generic type of scene node
+	for (std::vector<SceneNode *>::const_iterator ptr = children_.begin(); ptr < children_.end(); ptr++)
+	{
+		(*ptr)->Update();
+	}
 }
 
+
+void SceneNode::SetSpeed(float speed) {
+	speed_ = speed;
+}
 
 void SceneNode::SetupShader(GLuint program, bool toonModeOn, float roughness){
 
