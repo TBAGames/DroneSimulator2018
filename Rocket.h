@@ -1,6 +1,6 @@
 #pragma once
-#ifndef BOMB_H_
-#define BOMB_H_
+#ifndef ROCKET_H_
+#define ROCKET_H_
 
 #include <string>
 #define GLEW_STATIC
@@ -15,15 +15,15 @@
 
 namespace game {
 
-	// Abstraction of a bullet
-	class Bomb : public SceneNode {
+	// Abstraction of a Rocket
+	class Rocket : public SceneNode {
 
 	public:
-		// Create bomb from given resources
-		Bomb(const std::string name, const Resource *geometry, const Resource *material);
+		// Create Rocket from given resources
+		Rocket(const std::string name, const Resource *geometry, const Resource *material);
 
 		// Destructor
-		~Bomb();
+		~Rocket();
 
 		void SetDir(glm::vec3 direction);
 
@@ -32,7 +32,6 @@ namespace game {
 
 	private:
 		glm::vec3 direction_;
-		//const float speed_ = 9.8f;
 	};
 
 } // namespace game

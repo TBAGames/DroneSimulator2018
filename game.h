@@ -14,6 +14,7 @@
 #include "settings.h"
 #include "Bullet.h"
 #include "Bomb.h"
+#include "Rocket.h"
 
 namespace game {
 
@@ -55,6 +56,8 @@ namespace game {
 			// Update non-camera objects
 			void GameObjectUpdate(void);
 
+			
+			
 
         private:
             // GLFW window
@@ -91,13 +94,18 @@ namespace game {
             // Create an instance of an object stored in the resource manager
             SceneNode *CreateInstance(std::string entity_name, std::string object_name, std::string material_name, std::string texture_name = std::string(""));
 
-			//Firing the machine gun
+			
+			//Shooting the machine gun
 			void FireMachineGun(void);
 			Bullet *CreateBullet(void);
 
 			//Dropping the bomb 
 			void DropBomb(void);
-			//Bomb *CreateBomb(void);
+			Bomb *CreateBomb(void);
+
+			//Firing the rockets
+			void EngageRockets(void);
+			Rocket *CreateRocket(void);
 
 			// Settings
 			Settings settings_;
