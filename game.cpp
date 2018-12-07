@@ -123,6 +123,9 @@ void Game::InitEventHandlers(void){
 
 void Game::SetupResources(void){
 
+	//Create Sphere
+	resman_.CreateSphere("SimpleSphereMesh", 0.75, 10, 10);
+
     // Create turret parts
     resman_.CreateCylinder("TurretMesh");
 
@@ -164,6 +167,8 @@ void Game::SetupResources(void){
 
 	filename = std::string(MATERIAL_DIRECTORY) + std::string("/asphalt.png");
 	resman_.LoadResource(Texture, "Asphalt", filename.c_str());
+
+
 }
 
 
@@ -173,10 +178,39 @@ void Game::SetupScene(void){
     scene_.SetBackgroundColor(viewport_background_color_g);
 
 	// Create Ship
-	game::SceneNode *ship = CreateAsteroidInstance("Ship", "CubeMesh", "ShinyBlueMaterial");
+	game::SceneNode *ship = CreateAsteroidInstance("Ship", "SimpleSphereMesh", "ShinyBlueMaterial");
+	game::SceneNode *arms1 = CreateInstance("ShipArm1", "CubeMesh", "ShinyBlueMaterial");
+	game::SceneNode *arms2 = CreateInstance("ShipArm2", "CubeMesh", "ShinyBlueMaterial");
+	game::SceneNode *propel1 = CreateInstance("Pro1", "CubeMesh", "ShinyBlueMaterial");
+	game::SceneNode *propel2 = CreateInstance("Pro2", "CubeMesh", "ShinyBlueMaterial");
+	game::SceneNode *propel3 = CreateInstance("Pro3", "CubeMesh", "ShinyBlueMaterial");
+	game::SceneNode *propel4 = CreateInstance("Pro4", "CubeMesh", "ShinyBlueMaterial");
+
 	camera_.SwitchCameraMode();
 	//camera_.SetCameraMode(CameraMode::FirstPerson);
 	//camera->SetPosition(FIRST_PERSON_CHILD_OFFSET);
+	ship->AddChild(arms1);
+	ship->AddChild(arms2);
+	ship->AddChild(propel1);
+	ship->AddChild(propel2);
+	ship->AddChild(propel3);
+	ship->AddChild(propel4);
+
+	//Propeller Position
+	propel1->Translate(glm::vec3(-1.75, -0.15, 0.0));
+	propel2->Translate(glm::vec3(1.75, -0.15, 0.0));
+	propel3->Translate(glm::vec3(0.0, -0.15, -1.75));
+	propel4->Translate(glm::vec3(0.0, -0.15, 1.75));
+
+	//Ship Arms Scaling
+	arms1->Scale(glm::vec3(2.0, 0.1, 0.25));
+	arms2->Scale(glm::vec3(0.25, 0.1, 2.0));
+
+	//Propeller Scaling
+	propel1->Scale(glm::vec3(0.5, 0.05, 0.1));
+	propel2->Scale(glm::vec3(0.5, 0.05, 0.1));
+	propel3->Scale(glm::vec3(0.1, 0.05, 0.5));
+	propel4->Scale(glm::vec3(0.1, 0.05, 0.5));
 
  //   // Create an instance of the turret
 	game::SceneNode *turretBase = CreateInstance("TurretBase", "TurretMesh", "TexturedMaterial", "Crystal");
@@ -291,6 +325,11 @@ void Game::MainLoop(void){
 				node->Roll(rotation_factor*rotation_degree_roll);
 				node->Translate((node->GetForward()/100.0f) * float(movement_degree_fwd));
 				node->Translate((node->GetUp() / 100.0f) * float(movement_degree_up));
+
+				
+
+
+				//Pnode1->Yaw(rotation_factor);
 
 				camera_.Update();
 
