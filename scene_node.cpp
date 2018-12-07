@@ -367,10 +367,17 @@ void SceneNode::DrawGeometry(bool toonModeOn, float roughness)
 
 
 void SceneNode::Update(void){
-
     // Do nothing for this generic type of scene node
+	for (std::vector<SceneNode *>::const_iterator ptr = children_.begin(); ptr < children_.end(); ptr++)
+	{
+		(*ptr)->Update();
+	}
 }
 
+
+void SceneNode::SetSpeed(float speed) {
+	speed_ = speed;
+}
 
 void SceneNode::SetupShader(GLuint program, bool toonModeOn, float roughness){
 
@@ -411,13 +418,14 @@ void SceneNode::SetupShader(GLuint program, bool toonModeOn, float roughness){
 
 	GLint surface_roughness = glGetUniformLocation(program, "surface_roughness");
 	glUniform1f(surface_roughness, roughness);
+	glBindTexture(GL_TEXTURE_2D, texture_); // First texture we bind
 
     // Texture
     if (texture_){
         GLint tex = glGetUniformLocation(program, "texture_map");
         glUniform1i(tex, 0); // Assign the first texture to the map
         glActiveTexture(GL_TEXTURE0); 
-        glBindTexture(GL_TEXTURE_2D, texture_); // First texture we bind
+
 
 		if (!toonModeOn) {
 			// Define texture interpolation

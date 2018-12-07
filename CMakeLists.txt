@@ -5,11 +5,11 @@ project(DroneSimulator2018)
 
 # Specify project files: header files and source files
 set(HDRS
-    asteroid.h camera.h game.h model_loader.h resource.h resource_manager.h scene_graph.h scene_node.h settings.h
+    asteroid.h camera.h game.h model_loader.h resource.h resource_manager.h scene_graph.h scene_node.h settings.h Bullet.h Bomb.h Rocket.h
 )
  
 set(SRCS
-    asteroid.cpp camera.cpp game.cpp main.cpp resource.cpp resource_manager.cpp scene_graph.cpp scene_node.cpp settings.cpp material_fp.glsl material_vp.glsl metal_fp.glsl metal_vp.glsl plastic_fp.glsl plastic_vp.glsl textured_material_fp.glsl textured_material_vp.glsl three-term_shiny_blue_fp.glsl three-term_shiny_blue_vp.glsl normal_map_vp.glsl normal_map_fp.glsl screen_space_vp.glsl screen_space_fp.glsl particle_vp.glsl particle_fp.glsl particle_gp.glsl
+    asteroid.cpp camera.cpp game.cpp main.cpp resource.cpp resource_manager.cpp scene_graph.cpp scene_node.cpp settings.cpp Bullet.cpp Bomb.cpp Rocket.cpp material_fp.glsl material_vp.glsl metal_fp.glsl metal_vp.glsl plastic_fp.glsl plastic_vp.glsl textured_material_fp.glsl textured_material_vp.glsl three-term_shiny_blue_fp.glsl three-term_shiny_blue_vp.glsl normal_map_vp.glsl normal_map_fp.glsl screen_space_vp.glsl screen_space_fp.glsl particle_vp.glsl particle_fp.glsl particle_gp.glsl
 )
 
 # Add path name to configuration file
