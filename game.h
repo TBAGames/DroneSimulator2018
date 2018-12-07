@@ -76,6 +76,7 @@ namespace game {
             // Methods to handle events
             static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
             static void ResizeCallback(GLFWwindow* window, int width, int height);
+			SceneNode *skybox_;
 
             // Asteroid field
             // Create instance of one asteroid

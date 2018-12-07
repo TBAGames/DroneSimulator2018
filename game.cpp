@@ -129,6 +129,7 @@ void Game::SetupResources(void){
 	// Create torus
 	resman_.CreateTorus("TorusMesh");
 
+
     // Load material to be applied to turret
     //std::string filename = std::string(MATERIAL_DIRECTORY) + std::string("/three-term_shiny_blue");
     std::string filename = std::string(MATERIAL_DIRECTORY) + std::string("/metal");
@@ -138,6 +139,7 @@ void Game::SetupResources(void){
     // Load a cube from an obj file
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/cube.obj");
     resman_.LoadResource(Mesh, "CubeMesh", filename.c_str());
+
 
     // Load texture to be applied to the cube
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/checker.png");
@@ -152,7 +154,7 @@ void Game::SetupResources(void){
 	resman_.LoadResource(Mesh, "BuildingMesh", filename.c_str());
 
 	// Load building texture
-	filename = std::string(MATERIAL_DIRECTORY) + std::string("/building_texture.png");
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/building_texture.jpg");
 	resman_.LoadResource(Texture, "BuildingTexture", filename.c_str());
 
 	// Load textures to be applied to the cylinder
@@ -164,6 +166,14 @@ void Game::SetupResources(void){
 
 	filename = std::string(MATERIAL_DIRECTORY) + std::string("/asphalt.png");
 	resman_.LoadResource(Texture, "Asphalt", filename.c_str());
+
+	// Load cube map to be applied to skybox
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/island/island.tga");
+	resman_.LoadResource(CubeMap, "LakeCubeMap", filename.c_str());
+
+	// Load material to be applied to skybox
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/skybox");
+	resman_.LoadResource(Material, "SkyboxMaterial", filename.c_str());
 }
 
 
@@ -174,7 +184,7 @@ void Game::SetupScene(void){
 
 	// Create Ship
 	game::SceneNode *ship = CreateAsteroidInstance("Ship", "CubeMesh", "ShinyBlueMaterial");
-	camera_.SwitchCameraMode();
+	//camera_.SwitchCameraMode();
 	//camera_.SetCameraMode(CameraMode::FirstPerson);
 	//camera->SetPosition(FIRST_PERSON_CHILD_OFFSET);
 
@@ -224,6 +234,9 @@ void Game::SetupScene(void){
 	ground->SetOrientation(ship->GetOrientation());
 	ground->SetScale(glm::vec3(500.0f, 0.1f, 500.0f));
 
+	skybox_ = CreateInstance("CubeInstance1", "CubeMesh", "SkyboxMaterial");
+	skybox_->Scale(glm::vec3(50.0, 50.0, 50.0));
+	skybox_->Roll(glm::pi<float>());
 
 	// Create Buildings
 	int numBuildings = 15;
@@ -295,6 +308,8 @@ void Game::MainLoop(void){
 				camera_.Update();
 
 				CheckCollisions();
+
+				skybox_->SetPosition(node->GetPosition());
 
                 last_time = current_time;
             }

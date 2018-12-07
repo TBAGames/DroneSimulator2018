@@ -53,6 +53,8 @@ namespace game {
             void LoadTexture(const std::string name, const char *filename);
             // Loads a mesh in obj format
             void LoadMesh(const std::string name, const char *filename);
+			void LoadCubeMap(const std::string name, const char *filename);
+
 
     }; // class ResourceManager
 
