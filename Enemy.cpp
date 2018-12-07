@@ -1,5 +1,5 @@
-#include "bird.h"
-
+#include "Enemy.h"
+#include <iostream>
 
 Enemy::Enemy(const std::string name, const game::Resource *geometry, const game::Resource *material, const game::Resource *texture, glm::vec3 originPoint, game::SceneNode *play, std::string t) : game::SceneNode(name, geometry, material, texture)
 {
@@ -28,9 +28,10 @@ void Enemy::setForward(glm::vec3 newFwd)
 
 void Enemy::beHAVE(void) //Required to be said like Austin Powers
 {
-	float distance = glm::distance(GetPosition(), player->GetPosition());
+	float distance = abs(glm::distance(GetPosition(), player->GetPosition()));
 	glm::vec3 forwardTowardsPlayer = -glm::normalize(GetPosition() - player->GetPosition())/10.0f;
 	//glm::vec3 forwardTowardsOrigin = glm::normalize(GetPosition() - getOrigin());
+	std::cout << distance << std::endl;
 	if (type == "Bird") {
 		if (distance < 50.0)
 		{
@@ -60,11 +61,11 @@ void Enemy::beHAVE(void) //Required to be said like Austin Powers
 		{
 			Translate(glm::vec3(0.0f, 1.5f, 0.0f));
 		}
-		else if (distance < 100.0f && jump == false && GetPosition().y <= 0.0f)
+		else if (distance < 100.0f && jump == false)
 		{
 			setForward(forwardTowardsPlayer);
 			Translate(glm::vec3(forwardTowardsPlayer.x, 0.0f, forwardTowardsPlayer.z));
-			if (distance < 5.0 && jump == false) 
+			if (abs(glm::distance(glm::vec3(GetPosition().x, 0.0f, GetPosition().z), glm::vec3(player->GetPosition().x, 0.0, player->GetPosition().z))) < 5.0)
 			{
 				jump = true;
 			}

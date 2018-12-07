@@ -1,8 +1,6 @@
 #include <iostream>
 #include <time.h>
 #include <sstream>
-#include "Enemy.h"
-#include "dog.h"
 #include "game.h"
 #include "bin/path_config.h"
 
