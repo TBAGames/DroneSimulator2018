@@ -85,6 +85,10 @@ namespace game {
 			// Recursively grab the subtree with root this
 			std::vector<SceneNode *> *BuildNodeSubTree(std::vector<SceneNode *> *buildTree);
 
+			// For dynamic objects
+			float speed_ = 1.0f;
+			void SetSpeed(float speed);
+
 		protected:
 			glm::vec3 forward_ = glm::vec3(0.0, 0.0, -1.0);
 			glm::vec3 side_ = glm::vec3(1.0, 0.0, 0.0);
