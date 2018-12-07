@@ -15,10 +15,7 @@ namespace game {
 	}
 
 	void Bullet::Update(void) {
-
-		glm::vec3 pos = GetPosition();
 		Translate(direction_ * speed_);
-	
 	}
 
 } // namespace game

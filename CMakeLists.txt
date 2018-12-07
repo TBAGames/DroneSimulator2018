@@ -5,7 +5,7 @@ project(DroneSimulator2018)
 
 # Specify project files: header files and source files
 set(HDRS
-    asteroid.h camera.h game.h model_loader.h resource.h resource_manager.h scene_graph.h scene_node.h settings.h Bullet.h
+    asteroid.h camera.h game.h model_loader.h resource.h resource_manager.h scene_graph.h scene_node.h settings.h Bullet.h Bomb.h
 )
  
 set(SRCS

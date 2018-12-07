@@ -52,6 +52,9 @@ namespace game {
 			// Get camera
 			Camera *GetCamera(void);
 
+			// Update non-camera objects
+			void GameObjectUpdate(void);
+
 
         private:
             // GLFW window
@@ -94,7 +97,7 @@ namespace game {
 
 			//Dropping the bomb 
 			void DropBomb(void);
-			Bomb *CreateBomb(void);
+			//Bomb *CreateBomb(void);
 
 			// Settings
 			Settings settings_;

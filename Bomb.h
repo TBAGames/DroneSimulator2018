@@ -20,19 +20,19 @@ namespace game {
 
 	public:
 		// Create bomb from given resources
-		Bomb(const std::string name, const Resource *geometry, const Resource *material);
+		//Bomb(const std::string name, const Resource *geometry, const Resource *material);
 
 		// Destructor
-		~Bomb();
+		//~Bomb();
 
-		void SetDir(glm::vec3 direction);
+		//void SetDir(glm::vec3 direction);
 
 		// Update geometry configuration
-		void Update(void);
+		//void Update(void);
 
 	private:
-		glm::vec3 direction_;
-		const float speed_ = 9.8f;
+		//glm::vec3 direction_;
+		//const float speed_ = 9.8f;
 	};
 
 } // namespace game

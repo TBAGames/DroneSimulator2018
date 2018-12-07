@@ -180,8 +180,6 @@ void Game::SetupScene(void){
 	game::SceneNode *cannonBase = CreateInstance("CannonBase", "TurretMesh", "TexturedMaterial", "Crystal");
 	game::SceneNode *cannonHead = CreateInstance("CannonHead", "TurretMesh", "TexturedMaterial", "Nebula");
 
-	
-
 	// Turret Hierarchy
 	turretBase->AddChild(turretHead);
 	turretHead->AddChild(cannonBase);
@@ -227,7 +225,8 @@ void Game::SetupScene(void){
     //cube->Yaw(-45.0f * -glm::pi<float>() / 180.0f);
     cube->Translate(glm::vec3(0.0, 0.0, -1.0));
 
-
+	game::SceneNode *projectileContainer = CreateInstance("Projectiles", "CubeMesh", "ShinyBlueMaterial");
+	projectileContainer->SetScale(0.001f*glm::vec3(1.0, 1.0, 1.0));
 }
 
 
@@ -284,6 +283,7 @@ void Game::MainLoop(void){
 				node->Translate((node->GetUp() / 100.0f) * float(movement_degree_up));
 
 				camera_.Update();
+				GameObjectUpdate();
 				
                 last_time = current_time;
             }
@@ -494,19 +494,23 @@ void Game::FireMachineGun()
 	Bullet *bullet = CreateBullet();
 	game::SceneNode *node = scene_.GetNode("Ship");
 
-	bullet->SetPosition(node->GetPosition() + glm::vec3(0.0, 0.0, 3.0));
+	SceneNode *projectileContainer = scene_.GetNode("Projectiles");
+	projectileContainer->AddChild(bullet);
+
+	bullet->SetPosition(node->GetPosition() + node->GetForward()*3.0f);
 	bullet->SetOrientation(node->GetOrientation());
 	bullet->SetDir(node->GetForward());
+	bullet->SetSpeed(9.8f);
 }
 
 void Game::DropBomb()
 {
-	Bomb *bomb = CreateBomb();
+	/*Bomb *bomb = CreateBomb();
 	game::SceneNode *node = scene_.GetNode("Ship");
 
 	bomb->SetPosition((node->GetPosition()) + glm::vec3(0.0, 1.0, 0.0));
 	bomb->SetOrientation(node->GetOrientation());
-	bomb->SetDir(-(node->GetUp()));
+	bomb->SetDir(-(node->GetUp()));*/
 
 }
 
@@ -535,7 +539,7 @@ Bullet *Game::CreateBullet()
 
 	return bullet;
 }
-
+/*
 Bomb *Game::CreateBomb()
 {
 	std::string entity_name = "Bomb";
@@ -554,14 +558,17 @@ Bomb *Game::CreateBomb()
 
 	// Create ship instance
 	Bomb *bomb = new Bomb(entity_name, geom, mat);
-	//scene_.AddNode(ast);
+	scene_.AddNode(ast);
 
 	//std::cout << "Adding laser" << std::endl;
 	scene_.AddNode(bomb);
 
 	return bomb;
+}*/
+
+void Game::GameObjectUpdate(void) {
+
+	scene_.GetNode("Projectiles")->Update();
 }
-
-
 
 } // namespace game

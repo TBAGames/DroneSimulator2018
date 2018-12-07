@@ -32,7 +32,6 @@ namespace game {
 
 	private:
 		glm::vec3 direction_;
-		const float speed_ = 8.0f;
 	}; 
 
 } // namespace game
