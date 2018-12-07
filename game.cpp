@@ -133,7 +133,7 @@ void Game::SetupResources(void){
 	resman_.CreateTorus("TorusMesh");
 
 	// Load material to be applied to particles
-	filename = std::string(MATERIAL_DIRECTORY) + std::string("/muzzle_flash");
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/smoke");
 	resman_.LoadResource(Material, "ParticleMaterial", filename.c_str());
 
 	// Create particles for explosion
@@ -169,7 +169,11 @@ void Game::SetupResources(void){
 	filename = std::string(MATERIAL_DIRECTORY) + std::string("/asphalt.png");
 	resman_.LoadResource(Texture, "Asphalt", filename.c_str());
 
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/smoke.png");
+	resman_.LoadResource(Texture, "Smoke", filename.c_str());
 
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/fire.png");
+	resman_.LoadResource(Texture, "Fire", filename.c_str());
 }
 
 
@@ -244,7 +248,7 @@ void Game::SetupScene(void){
 		}
 	}*/
 
-	game::SceneNode *particles1 = CreateInstance("ParticleInstance1", "SphereParticles", "ParticleMaterial");
+	game::SceneNode *particles1 = CreateInstance("ParticleInstance1", "SphereParticles", "ParticleMaterial", "Smoke");
 	//game::SceneNode *particles2 = CreateInstance("ParticleInstance2", "SphereParticles", "ParticleMaterial");
 	//game::SceneNode *particles3 = CreateInstance("ParticleInstance3", "SphereParticles", "ParticleMaterial");
 
