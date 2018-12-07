@@ -46,7 +46,11 @@ void ResourceManager::LoadResource(ResourceType type, const std::string name, co
         LoadMaterial(name, filename);
     } else if (type == Texture){
         LoadTexture(name, filename);
-    } else if (type == Mesh){
+    }
+	else if (type == CubeMap) {
+		LoadCubeMap(name, filename);
+	}
+	else if (type == Mesh){
         LoadMesh(name, filename);
     } else {
         throw(std::invalid_argument(std::string("Invalid type of resource")));
@@ -434,6 +438,32 @@ void ResourceManager::CreateSphere(std::string object_name, float radius, int nu
 
     // Create resource
     AddResource(Mesh, object_name, vbo, ebo, face_num * face_att);
+}
+
+void ResourceManager::LoadCubeMap(const std::string name, const char *filename) {
+
+	// Get base and extension of filename
+	std::string fn(filename);
+	int pos = fn.find(".");
+	std::string base = fn.substr(0, pos);
+	std::string ext = fn.substr(pos + 1);
+
+	// Create filenames of each individual cube face
+	std::string fn_xp = base + "_ft." + ext;
+	std::string fn_xn = base + "_bk." + ext;
+	std::string fn_yp = base + "_up." + ext;
+	std::string fn_yn = base + "_dn." + ext;
+	std::string fn_zp = base + "_rt." + ext;
+	std::string fn_zn = base + "_lf." + ext;
+
+	// Load cube map from file
+	GLuint texture = SOIL_load_OGL_cubemap(fn_xp.c_str(), fn_xn.c_str(), fn_yp.c_str(), fn_yn.c_str(), fn_zp.c_str(), fn_zn.c_str(), SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, 0);
+	if (!texture) {
+		throw(std::ios_base::failure(std::string("Error loading cube map ") + std::string(base) + std::string("<spec>.") + std::string(ext) + std::string(": ") + std::string(SOIL_last_result())));
+	}
+
+	// Create resource
+	AddResource(CubeMap, name, texture, 0);
 }
 
 
