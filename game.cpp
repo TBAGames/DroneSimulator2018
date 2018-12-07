@@ -1,7 +1,8 @@
 #include <iostream>
 #include <time.h>
 #include <sstream>
-#include "bird.h"
+#include "Enemy.h"
+#include "dog.h"
 #include "game.h"
 #include "bin/path_config.h"
 
@@ -16,6 +17,8 @@ const unsigned int window_width_g = 800;
 const unsigned int window_height_g = 600;
 const bool window_full_screen_g = false;
 const float rotation_factor = glm::pi<float>() / 200;
+enum EnemyType { Bird, Dog, MailMan };
+
 
 // Viewport and camera settings
 float camera_near_clip_distance_g = 0.01;
@@ -199,7 +202,8 @@ void Game::SetupScene(void){
 	torus->Translate(glm::vec3(-1.5, -1.5, 0.0));
 
 	//createbirb
-	game::SceneNode *bird = CreateBirdInstance("bird", "CubeMesh", "ShinyBlueMaterial","Crystal", glm::vec3(0.0f, -50.0f, 0.0f), ship);
+	game::SceneNode *enemy = CreateEnemyInstance("bird", "CubeMesh", "ShinyBlueMaterial", "Crystal", glm::vec3(25.0f, 0.0f, 25.0f), ship, "Dog");
+
 	//bird *Game::CreateBirdInstance(std::string entity_name, std::string object_name, std::string material_name, std::string texture_name, glm::vec3 origin_point, SceneNode *player) {
 
 
@@ -269,7 +273,7 @@ void Game::MainLoop(void){
 
                 // Animate the turret
 				SceneNode *node;
-				bird *birb;
+				Enemy *enemy;
 				glm::quat rotation;
 
                 // Animate the ship
@@ -281,8 +285,8 @@ void Game::MainLoop(void){
 				node->Translate((node->GetUp() / 100.0f) * float(movement_degree_up));
 
 				node = scene_.GetNode("bird");
-				birb = (bird*)node;
-				birb->beHAVE();
+				enemy = (Enemy*)node;
+				enemy->beHAVE();
 				camera_.Update();
 
                 last_time = current_time;
@@ -424,7 +428,7 @@ Asteroid *Game::CreateAsteroidInstance(std::string entity_name, std::string obje
     return ast;
 }
 //const std::string name, const game::Resource *geometry, const game::Resource *material, const game::Resource *texture, glm::vec3 originPoint, game::SceneNode *play
-bird *Game::CreateBirdInstance(std::string entity_name, std::string object_name, std::string material_name, std::string texture_name, glm::vec3 origin_point, SceneNode *player) {
+Enemy *Game::CreateEnemyInstance(std::string entity_name, std::string object_name, std::string material_name, std::string texture_name, glm::vec3 origin_point, SceneNode *player, std::string type) {
 
 	// Get resources
 	Resource *geom = resman_.GetResource(object_name);
@@ -445,12 +449,13 @@ bird *Game::CreateBirdInstance(std::string entity_name, std::string object_name,
 		}
 	}
 
-	// Create asteroid instance
-	bird *ast = new bird(entity_name, geom, mat, tex, origin_point, player);
+	Enemy *ast = new Enemy(entity_name, geom, mat, tex, origin_point, player, type);
 	scene_.AddNode(ast);
 	camera_.AddChild(ast);
 	return ast;
 }
+
+
 
 
 void Game::CreateAsteroidField(int num_asteroids){
