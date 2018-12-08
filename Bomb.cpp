@@ -14,6 +14,14 @@ namespace game {
 		direction_ = direction;
 	}
 
+	void Bomb::DestroyProjectile(bool condition)
+	{
+		if (condition)
+		{
+			delete this;
+		}
+	}
+
 	void Bomb::Update(void) {
 
 		glm::vec3 pos = GetPosition();

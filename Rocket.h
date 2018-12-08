@@ -12,11 +12,13 @@
 
 #include "resource.h"
 #include "scene_node.h"
+#include "Projectile.h"
+
 
 namespace game {
 
 	// Abstraction of a Rocket
-	class Rocket : public SceneNode {
+	class Rocket : public SceneNode, public Projectile {
 
 	public:
 		// Create Rocket from given resources
@@ -24,6 +26,8 @@ namespace game {
 
 		// Destructor
 		~Rocket();
+
+		void DestroyProjectile(bool condition);
 
 		void SetDir(glm::vec3 direction);
 

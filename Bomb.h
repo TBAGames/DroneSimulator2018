@@ -12,11 +12,12 @@
 
 #include "resource.h"
 #include "scene_node.h"
+#include "Projectile.h"
 
 namespace game {
 
 	// Abstraction of a bullet
-	class Bomb : public SceneNode {
+	class Bomb : public SceneNode, public Projectile {
 
 	public:
 		// Create bomb from given resources
@@ -26,6 +27,8 @@ namespace game {
 		~Bomb();
 
 		void SetDir(glm::vec3 direction);
+
+		void DestroyProjectile(bool condition);
 
 		// Update geometry configuration
 		void Update(void);

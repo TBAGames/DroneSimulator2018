@@ -326,29 +326,44 @@ void Game::MainLoop(void){
     while (!glfwWindowShouldClose(window_)){
         // Animate the scene
         if (animating_){
-            static double last_time = 0;
-            double current_time = glfwGetTime();
-            if ((current_time - last_time) > 0.01){
+              static double last_time = 0;
+              double current_time = glfwGetTime();
+              if ((current_time - last_time) > 0.01){
 
-                // Animate the turret
-				SceneNode *node;
-				glm::quat rotation;
+                          // Animate the turret
+                  SceneNode *node;
+                  glm::quat rotation;
 
-                // Animate the ship
-                node = scene_.GetNode("Ship");
-				node->Pitch(rotation_factor*rotation_degree_pitch);
-				node->Yaw(rotation_factor*rotation_degree_yaw);
-				node->Roll(rotation_factor*rotation_degree_roll);
-				node->Translate((node->GetForward()/100.0f) * float(movement_degree_fwd));
-				node->Translate((node->GetUp() / 100.0f) * float(movement_degree_up));
+                          // Animate the ship
+                          node = scene_.GetNode("Ship");
+                  node->Pitch(rotation_factor*rotation_degree_pitch);
+                  node->Yaw(rotation_factor*rotation_degree_yaw);
+                  node->Roll(rotation_factor*rotation_degree_roll);
+                  node->Translate((node->GetForward()/100.0f) * float(movement_degree_fwd));
+                  node->Translate((node->GetUp() / 100.0f) * float(movement_degree_up));
 
-				camera_.Update();
-				GameObjectUpdate();
-				CheckCollisions();
+                  camera_.Update();
+                  GameObjectUpdate();
 
-				skybox_->SetPosition(node->GetPosition());
-        last_time = current_time;
-            }
+                  SceneNode * proj = scene_.GetNode("Projectiles");
+                  for (int i = 0; i < proj->GetChildren().size(); i++)
+                  {
+                    SceneNode * projNode = scene_.GetNode("Projectiles")->GetChildren()[i];
+                    if (glm::distance(node->GetPosition(), scene_.GetNode("Projectiles")->GetChildren()[i]->GetPosition()) > 100.0f) 
+                    {
+                      scene_.GetNode("Projectiles")->RemoveChild(projNode);
+                      scene_.RemoveNode(projNode);
+                      delete projNode;
+                    }
+                  }
+
+
+                  last_time = current_time;
+
+                  CheckCollisions();
+                  skybox_->SetPosition(node->GetPosition());
+              }
+
         }
 
         // Draw the scene
