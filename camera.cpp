@@ -100,8 +100,8 @@ void Camera::Update(void) {
 	up = ship->GetUp();
 
 	if (camera_mode_ == CameraMode::FIRST_PERSON) {
-		position = ship->GetPosition() + ship->GetForward();
-		look_at = ship->GetPosition() - (-1.5f)*glm::normalize(ship->GetForward());
+		position = ship->GetPosition() + ship->GetForward() * 2.0f;
+		look_at = ship->GetPosition() - (-3.0f)*glm::normalize(ship->GetForward());
 		//ship->getForward();
 	}
 	else {

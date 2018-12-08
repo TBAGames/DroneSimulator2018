@@ -178,23 +178,23 @@ void Game::SetupScene(void){
     scene_.SetBackgroundColor(viewport_background_color_g);
 
 	// Create Ship
-	game::SceneNode *ship = CreateAsteroidInstance("Ship", "SimpleSphereMesh", "ShinyBlueMaterial");
-	game::SceneNode *arms1 = CreateInstance("ShipArm1", "CubeMesh", "ShinyBlueMaterial");
-	game::SceneNode *arms2 = CreateInstance("ShipArm2", "CubeMesh", "ShinyBlueMaterial");
-	game::SceneNode *propel1 = CreateInstance("Pro1", "CubeMesh", "ShinyBlueMaterial");
-	game::SceneNode *propel2 = CreateInstance("Pro2", "CubeMesh", "ShinyBlueMaterial");
-	game::SceneNode *propel3 = CreateInstance("Pro3", "CubeMesh", "ShinyBlueMaterial");
-	game::SceneNode *propel4 = CreateInstance("Pro4", "CubeMesh", "ShinyBlueMaterial");
+	SceneNode *ship = CreateAsteroidInstance("Ship", "SimpleSphereMesh", "ShinyBlueMaterial");
+	SceneNode *arms1 = CreateInstance("ShipArm1", "CubeMesh", "ShinyBlueMaterial");
+	SceneNode *arms2 = CreateInstance("ShipArm2", "CubeMesh", "ShinyBlueMaterial");
+	SceneNode *propel1 = CreateInstance("Pro1", "CubeMesh", "ShinyBlueMaterial");
+	SceneNode *propel2 = CreateInstance("Pro2", "CubeMesh", "ShinyBlueMaterial");
+	SceneNode *propel3 = CreateInstance("Pro3", "CubeMesh", "ShinyBlueMaterial");
+	SceneNode *propel4 = CreateInstance("Pro4", "CubeMesh", "ShinyBlueMaterial");
 
 	camera_.SwitchCameraMode();
 	//camera_.SetCameraMode(CameraMode::FirstPerson);
 	//camera->SetPosition(FIRST_PERSON_CHILD_OFFSET);
 	ship->AddChild(arms1);
 	ship->AddChild(arms2);
-	ship->AddChild(propel1);
-	ship->AddChild(propel2);
-	ship->AddChild(propel3);
-	ship->AddChild(propel4);
+	arms1->AddChild(propel1);
+	arms1->AddChild(propel2);
+	arms2->AddChild(propel3);
+	arms2->AddChild(propel4);
 
 	//Propeller Position
 	propel1->Translate(glm::vec3(-1.75, -0.15, 0.0));
@@ -213,10 +213,10 @@ void Game::SetupScene(void){
 	propel4->Scale(glm::vec3(0.1, 0.05, 0.5));
 
  //   // Create an instance of the turret
-	game::SceneNode *turretBase = CreateInstance("TurretBase", "TurretMesh", "TexturedMaterial", "Crystal");
-	game::SceneNode *turretHead = CreateInstance("TurretHead", "TurretMesh", "TexturedMaterial", "Nebula");
-	game::SceneNode *cannonBase = CreateInstance("CannonBase", "TurretMesh", "TexturedMaterial", "Crystal");
-	game::SceneNode *cannonHead = CreateInstance("CannonHead", "TurretMesh", "TexturedMaterial", "Nebula");
+	SceneNode *turretBase = CreateInstance("TurretBase", "TurretMesh", "TexturedMaterial", "Crystal");
+	SceneNode *turretHead = CreateInstance("TurretHead", "TurretMesh", "TexturedMaterial", "Nebula");
+	SceneNode *cannonBase = CreateInstance("CannonBase", "TurretMesh", "TexturedMaterial", "Crystal");
+	SceneNode *cannonHead = CreateInstance("CannonHead", "TurretMesh", "TexturedMaterial", "Nebula");
 
 	// Turret Hierarchy
 	turretBase->AddChild(turretHead);
@@ -240,11 +240,11 @@ void Game::SetupScene(void){
 	cannonHead->Scale(glm::vec3(0.15, 0.25, 0.15));
 
 	// Create Torus
-	game::SceneNode *torus = CreateInstance("TorusInstance1", "TorusMesh", "ShinyBlueMaterial");
+	SceneNode *torus = CreateInstance("TorusInstance1", "TorusMesh", "ShinyBlueMaterial");
 	torus->Translate(glm::vec3(-1.5, -1.5, 0.0));
 
     // Create an instance of the textured cube
-    //game::SceneNode *cube = CreateInstance("CubeInstance1", "CubeMesh", "TexturedMaterial", "Checker");
+    //SceneNode *cube = CreateInstance("CubeInstance1", "CubeMesh", "TexturedMaterial", "Checker");
 
     // Adjust the instance
     //cube->Scale(glm::vec3(0.7, 0.7, 0.7));
@@ -253,7 +253,7 @@ void Game::SetupScene(void){
     //cube->Translate(glm::vec3(0.0, 0.0, -1.0));
 
 	// Create ground
-	game::SceneNode *ground = CreateInstance("Ground", "CubeMesh", "TexturedMaterial", "Asphalt");
+	SceneNode *ground = CreateInstance("Ground", "CubeMesh", "TexturedMaterial", "Asphalt");
 	ground->SetPosition(ship->GetPosition() - glm::vec3(0.0, -50.0, 0.0));
 	ground->SetOrientation(ship->GetOrientation());
 	ground->SetScale(glm::vec3(500.0f, 0.1f, 500.0f));
@@ -265,7 +265,7 @@ void Game::SetupScene(void){
 	{
 		for (int j = 0; j < numBuildings; j++)
 		{
-			game::SceneNode *building = CreateInstance("Building" + (i*numBuildings)+j, "CubeMesh", "TexturedMaterial", "BuildingTexture");
+			SceneNode *building = CreateInstance("Building" + (i*numBuildings)+j, "CubeMesh", "TexturedMaterial", "BuildingTexture");
 			ground->AddChild(building);
 			building->SetScale(glm::vec3(5.0, 100.0, 5.0));
 			building->SetPosition(glm::vec3(100.0*(i-(int)(numBuildings/2)), 50.0, 100.0*(j-(int)(numBuildings/2))));
@@ -326,12 +326,19 @@ void Game::MainLoop(void){
 				node->Translate((node->GetForward()/100.0f) * float(movement_degree_fwd));
 				node->Translate((node->GetUp() / 100.0f) * float(movement_degree_up));
 
-				
-
-
-				//Pnode1->Yaw(rotation_factor);
-
 				camera_.Update();
+
+				// Rotate propeller blades
+				std::vector<SceneNode *> children = node->GetChildren();
+				for (std::vector<SceneNode *>::iterator ptr = children.begin(); ptr < children.end(); ptr++) {
+					if ((*ptr)->GetName().find("arms")) {
+						std::vector<SceneNode *> a_children = (*ptr)->GetChildren();
+						for (std::vector<SceneNode *>::iterator ptr2 = a_children.begin(); ptr2 < a_children.end(); ptr2++) {							
+							(*ptr2)->Yaw(30.0);
+							(*ptr2)->Update();
+						}
+					}
+				}
 
 				CheckCollisions();
 

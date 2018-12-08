@@ -139,14 +139,17 @@ void SceneNode::Translate(glm::vec3 trans){
 }
 
 void SceneNode::Rotate(glm::quat rot){
-
+	std::cout << "Rotating " << GetName() << std::endl;
     orientation_ *= rot;
     orientation_ = glm::normalize(orientation_);
 
 	//if (parent_ != NULL) {
 		for (int i = 0; i < children_.size(); i++)
 		{
+			glm::vec3 offset = GetPosition() - children_.at(i)->GetPosition();
+			children_.at(i)->Translate(offset);
 			children_.at(i)->Rotate(rot);
+			children_.at(i)->Translate(-offset);
 		}
 	//}
 }
@@ -191,7 +194,7 @@ void SceneNode::Pitch(float angle) {
 		glm::vec3 offset_vec = children_.at(i)->GetPosition() - GetPosition();
 		glm::vec3 translation = qrot(rotation, offset_vec);
 		children_.at(i)->Translate(translation);
-		children_.at(i)->SetOrientation(orientation_);
+		children_.at(i)->Rotate(rotation);
 	}
 }
 
@@ -206,7 +209,7 @@ void SceneNode::Yaw(float angle) {
 		glm::vec3 offset_vec = children_.at(i)->GetPosition() - GetPosition();
 		glm::vec3 translation = qrot(rotation, offset_vec);
 		children_.at(i)->Translate(translation);
-		children_.at(i)->SetOrientation(orientation_);
+		children_.at(i)->Rotate(rotation);
 	}
 }
 
@@ -221,7 +224,7 @@ void SceneNode::Roll(float angle) {
 		glm::vec3 offset_vec = children_.at(i)->GetPosition() - GetPosition();
 		glm::vec3 translation = qrot(rotation, offset_vec);
 		children_.at(i)->Translate(translation);
-		children_.at(i)->SetOrientation(orientation_);
+		children_.at(i)->Rotate(rotation);
 	}
 }
 
@@ -277,10 +280,10 @@ void SceneNode::AddChild(SceneNode *child) {
 	
 	SceneNode *prevParent = child->GetParent();
 
-	std::cout << "Has Prev Parent? " << ((prevParent != NULL) ? "Yes" : "No") << std::endl;
+	//std::cout << "Has Prev Parent? " << ((prevParent != NULL) ? "Yes" : "No") << std::endl;
 
 	// Add node to tree
-	std::cout << "Here" << std::endl;
+	//std::cout << "Here" << std::endl;
 	child->SetParent(this);
 	children_.push_back(child);
 	std::string children = "Parent: " + ((this->GetParent() != NULL) ? this->GetParent()->GetName() : "?") + " -> " + this->GetName() + " -> Children: ";
@@ -288,7 +291,7 @@ void SceneNode::AddChild(SceneNode *child) {
 	{
 		children += children_.at(i)->GetName() + ", ";
 	}
-	std::cout << children << std::endl;
+	//std::cout << children << std::endl;
 }
 
 void SceneNode::SetParent(SceneNode *parent) {
