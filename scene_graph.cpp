@@ -99,7 +99,7 @@ void SceneGraph::Draw(Camera *camera, bool toonModeOn, float roughness){
     // Draw all scene nodes
     for (int i = 0; i < node_.size(); i++){
         //node_[i]->Draw();
-		std::cout << node_[i]->GetName() << std::endl;
+		//std::cout << node_[i]->GetName() << std::endl;
 		node_[i]->SetupGeometry();
 		// Set globals for camera
 		camera->SetupShader(node_[i]->GetMaterial());
