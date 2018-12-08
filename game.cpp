@@ -103,6 +103,7 @@ void Game::InitView(void){
 
     // Set up camera
     // Set current view
+	camera_.SwitchCameraMode();
     camera_.SetView(camera_position_g, camera_look_at_g, camera_up_g);
     // Set projection
     camera_.SetProjection(camera_fov_g, camera_near_clip_distance_g, camera_far_clip_distance_g, width, height);
@@ -126,16 +127,30 @@ void Game::InitEventHandlers(void){
 
 void Game::SetupResources(void){
 
+	std::string filename;
+
     // Create turret parts
     resman_.CreateCylinder("TurretMesh");
 
 	// Create torus
 	resman_.CreateTorus("TorusMesh");
 
+	// Load material to be applied to particles
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/smoke");
+	resman_.LoadResource(Material, "SmokeParticleMaterial", filename.c_str());
+
+	// Load material to be applied to particles
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/muzzle_flash");
+	resman_.LoadResource(Material, "MuzzleParticleMaterial", filename.c_str());
+
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/flame");
+	resman_.LoadResource(Material, "FireParticleMaterial", filename.c_str());
+
+	// Create particles for explosion
+	resman_.CreateSphereParticles("SphereParticles");
+
     // Load material to be applied to turret
-    //std::string filename = std::string(MATERIAL_DIRECTORY) + std::string("/three-term_shiny_blue");
-    std::string filename = std::string(MATERIAL_DIRECTORY) + std::string("/metal");
-    //std::string filename = std::string(MATERIAL_DIRECTORY) + std::string("/plastic");
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/metal");
     resman_.LoadResource(Material, "ShinyBlueMaterial", filename.c_str());
 
     // Load a cube from an obj file
@@ -148,14 +163,10 @@ void Game::SetupResources(void){
 
     // Load material to be applied to the cube
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/textured_material");
-    resman_.LoadResource(Material, "TexturedMaterial", filename.c_str());
-
-	// Load building mesh from obj
-	filename = std::string(MATERIAL_DIRECTORY) + std::string("/building.obj");
-	resman_.LoadResource(Mesh, "BuildingMesh", filename.c_str());
+	resman_.LoadResource(Material, "TexturedMaterial", filename.c_str());
 
 	// Load building texture
-	filename = std::string(MATERIAL_DIRECTORY) + std::string("/building_texture.png");
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/building_texture.jpg");
 	resman_.LoadResource(Texture, "BuildingTexture", filename.c_str());
 
 	// Load textures to be applied to the cylinder
@@ -167,13 +178,28 @@ void Game::SetupResources(void){
 
 	// Create a simple sphere to represent the asteroids
 	resman_.CreateSphere("SimpleSphereMesh", 0.5, 10, 10);
+
 	// Load material to be applied to asteroids
 	filename = std::string(MATERIAL_DIRECTORY) + std::string("/material");
 	resman_.LoadResource(Material, "ObjectMaterial", filename.c_str());
 
-
 	filename = std::string(MATERIAL_DIRECTORY) + std::string("/asphalt.png");
 	resman_.LoadResource(Texture, "Asphalt", filename.c_str());
+
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/smoke.png");
+	resman_.LoadResource(Texture, "Smoke", filename.c_str());
+
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/fire.png");
+	resman_.LoadResource(Texture, "Fire", filename.c_str());
+
+	// Load cube map to be applied to skybox
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/island/island.tga");
+	resman_.LoadResource(CubeMap, "LakeCubeMap", filename.c_str());
+
+	// Load material to be applied to skybox
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/skybox");
+	resman_.LoadResource(Material, "SkyboxMaterial", filename.c_str());
+
 }
 
 
@@ -184,12 +210,12 @@ void Game::SetupScene(void){
 
 	// Create Ship
 	game::SceneNode *ship = CreateAsteroidInstance("Ship", "CubeMesh", "ShinyBlueMaterial");
-	camera_.SwitchCameraMode();
+	//camera_.SwitchCameraMode();
 	//camera_.SetCameraMode(CameraMode::FirstPerson);
 	//camera->SetPosition(FIRST_PERSON_CHILD_OFFSET);
 
  //   // Create an instance of the turret
-	game::SceneNode *turretBase = CreateInstance("TurretBase", "TurretMesh", "TexturedMaterial", "Crystal");
+	/*game::SceneNode *turretBase = CreateInstance("TurretBase", "TurretMesh", "TexturedMaterial", "Crystal");
 	game::SceneNode *turretHead = CreateInstance("TurretHead", "TurretMesh", "TexturedMaterial", "Nebula");
 	game::SceneNode *cannonBase = CreateInstance("CannonBase", "TurretMesh", "TexturedMaterial", "Crystal");
 	game::SceneNode *cannonHead = CreateInstance("CannonHead", "TurretMesh", "TexturedMaterial", "Nebula");
@@ -217,7 +243,7 @@ void Game::SetupScene(void){
 
 	// Create Torus
 	game::SceneNode *torus = CreateInstance("TorusInstance1", "TorusMesh", "ShinyBlueMaterial");
-	torus->Translate(glm::vec3(-1.5, -1.5, 0.0));
+	torus->Translate(glm::vec3(-1.5, -1.5, 0.0));*/
 
     // Create an instance of the textured cube
     //game::SceneNode *cube = CreateInstance("CubeInstance1", "CubeMesh", "TexturedMaterial", "Checker");
@@ -237,9 +263,12 @@ void Game::SetupScene(void){
 	ground->SetOrientation(ship->GetOrientation());
 	ground->SetScale(glm::vec3(500.0f, 0.1f, 500.0f));
 
+	skybox_ = CreateInstance("CubeInstance1", "CubeMesh", "SkyboxMaterial");
+	skybox_->Scale(glm::vec3(50.0, 50.0, 50.0));
+	skybox_->Roll(glm::pi<float>());
 
 	// Create Buildings
-	int numBuildings = 15;
+	/*int numBuildings = 1;
 	for (int i = 0; i < numBuildings; i++)
 	{
 		for (int j = 0; j < numBuildings; j++)
@@ -249,7 +278,15 @@ void Game::SetupScene(void){
 			building->SetScale(glm::vec3(5.0, 100.0, 5.0));
 			building->SetPosition(glm::vec3(100.0*(i-(int)(numBuildings/2)), 50.0, 100.0*(j-(int)(numBuildings/2))));
 		}
-	}
+	}*/
+
+	//game::SceneNode *particles1 = CreateInstance("ParticleInstance1", "SphereParticles", "ParticleMaterial", "Smoke");
+	//game::SceneNode *particles2 = CreateInstance("ParticleInstance2", "SphereParticles", "ParticleMaterial");
+	//game::SceneNode *particles3 = CreateInstance("ParticleInstance3", "SphereParticles", "ParticleMaterial");
+
+	//particles1->Translate(ship->GetPosition() + ship->GetForward() * 10.0f);
+	//particles2->Translate(ship->GetPosition() + glm::vec3(0.5, 0.5, 0.0));
+	//particles3->Translate(ship->GetPosition() + glm::vec3(-0.5, -0.5, 0.0));
 }
 
 
@@ -289,42 +326,44 @@ void Game::MainLoop(void){
     while (!glfwWindowShouldClose(window_)){
         // Animate the scene
         if (animating_){
-            static double last_time = 0;
-            double current_time = glfwGetTime();
-            if ((current_time - last_time) > 0.01){
+              static double last_time = 0;
+              double current_time = glfwGetTime();
+              if ((current_time - last_time) > 0.01){
 
-                // Animate the turret
-				SceneNode *node;
-				glm::quat rotation;
+                          // Animate the turret
+                  SceneNode *node;
+                  glm::quat rotation;
 
-                // Animate the ship
-                node = scene_.GetNode("Ship");
-				node->Pitch(rotation_factor*rotation_degree_pitch);
-				node->Yaw(rotation_factor*rotation_degree_yaw);
-				node->Roll(rotation_factor*rotation_degree_roll);
-				node->Translate((node->GetForward()/100.0f) * float(movement_degree_fwd));
-				node->Translate((node->GetUp() / 100.0f) * float(movement_degree_up));
+                          // Animate the ship
+                          node = scene_.GetNode("Ship");
+                  node->Pitch(rotation_factor*rotation_degree_pitch);
+                  node->Yaw(rotation_factor*rotation_degree_yaw);
+                  node->Roll(rotation_factor*rotation_degree_roll);
+                  node->Translate((node->GetForward()/100.0f) * float(movement_degree_fwd));
+                  node->Translate((node->GetUp() / 100.0f) * float(movement_degree_up));
 
-				camera_.Update();
-				GameObjectUpdate();
+                  camera_.Update();
+                  GameObjectUpdate();
 
-				SceneNode * proj = scene_.GetNode("Projectiles");
-				for (int i = 0; i < proj->GetChildren().size(); i++)
-				{
-					SceneNode * projNode = scene_.GetNode("Projectiles")->GetChildren()[i];
-					if (glm::distance(node->GetPosition(), scene_.GetNode("Projectiles")->GetChildren()[i]->GetPosition()) > 100.0f) 
-					{
-						scene_.GetNode("Projectiles")->RemoveChild(projNode);
-						scene_.RemoveNode(projNode);
-						delete projNode;
-					}
-				}
+                  SceneNode * proj = scene_.GetNode("Projectiles");
+                  for (int i = 0; i < proj->GetChildren().size(); i++)
+                  {
+                    SceneNode * projNode = scene_.GetNode("Projectiles")->GetChildren()[i];
+                    if (glm::distance(node->GetPosition(), scene_.GetNode("Projectiles")->GetChildren()[i]->GetPosition()) > 100.0f) 
+                    {
+                      scene_.GetNode("Projectiles")->RemoveChild(projNode);
+                      scene_.RemoveNode(projNode);
+                      delete projNode;
+                    }
+                  }
 
-				
-                last_time = current_time;
 
-				CheckCollisions();
-            }
+                  last_time = current_time;
+
+                  CheckCollisions();
+                  skybox_->SetPosition(node->GetPosition());
+              }
+
         }
 
         // Draw the scene
@@ -569,7 +608,7 @@ SceneNode *Game::CreateInstance(std::string entity_name, std::string object_name
 
     SceneNode *scn = scene_.CreateNode(entity_name, geom, mat, tex);
 
-	//By default, add new node to scene
+	//By default, add new node as a child of scene
 	scene_.AddNode(scn);
     return scn;
 }
@@ -583,10 +622,10 @@ void Game::FireMachineGun()
 {
 	//Create an instance of the bullet 
 	Bullet *bullet = CreateBullet();
-	game::SceneNode *node = scene_.GetNode("Ship");
-
-	//Put the instances made, into a scene tree 
+	SceneNode *node = scene_.GetNode("Ship");
 	SceneNode *projectileContainer = scene_.GetNode("Projectiles");
+	SceneNode *bulletEffect = CreateInstance("ParticleInstance1", "SphereParticles", "MuzzleParticleMaterial");
+
 	projectileContainer->AddChild(bullet);
 
 	//Gets the position of where the bullet will start, the direction it will head, speed of the bullet
@@ -594,16 +633,22 @@ void Game::FireMachineGun()
 	bullet->SetOrientation(node->GetOrientation());
 	bullet->SetDir(node->GetForward());
 	bullet->SetSpeed(2.5f);
+
+	bullet->AddChild(bulletEffect);
+
+	bulletEffect->SetPosition(-1.0f * bullet->GetForward());
+	bulletEffect->SetOrientation(bullet->GetOrientation());
+
 }
 
 void Game::DropBomb()
 {
 	//Create an instance of the bomb 
 	Bomb *bomb = CreateBomb();
-	game::SceneNode *node = scene_.GetNode("Ship");
-
-	//Put the instances made, into a scene tree
+	SceneNode *node = scene_.GetNode("Ship");
 	SceneNode *projectileContainer = scene_.GetNode("Projectiles");
+	SceneNode *bombEffect = CreateInstance("ParticleInstance1", "SphereParticles", "SmokeParticleMaterial", "Smoke");
+
 	projectileContainer->AddChild(bomb);
 
 	//Gets the position of where the bomb will start, the direction it will head, speed of the bomb
@@ -611,23 +656,34 @@ void Game::DropBomb()
 	bomb->SetOrientation(node->GetOrientation());
 	bomb->SetDir(-(node->GetUp()));
 	bomb->SetSpeed(0.25f);
+
+	bomb->AddChild(bombEffect);
+
+	bombEffect->SetPosition(-3.0f * bomb->GetForward());
+	bombEffect->SetOrientation(bomb->GetOrientation());
+
 }
 
 void Game::EngageRockets()
 {
 	//Create an instance of the rocket 
-	Rocket *rocket = CreateRocket();
-	game::SceneNode *node = scene_.GetNode("Ship");
-
-	//Put the instances made, into a scene tree
+	Bomb *rocket = CreateBomb();
+	SceneNode *node = scene_.GetNode("Ship");
 	SceneNode *projectileContainer = scene_.GetNode("Projectiles");
+	SceneNode *rocketEffect = CreateInstance("ParticleInstance1", "SphereParticles", "FireParticleMaterial", "Fire");
+
 	projectileContainer->AddChild(rocket);
 
-	//Gets the position of where the bomb will start, the direction it will head, speed of the rocket
-	rocket->SetPosition((node->GetPosition()) + node->GetUp()*2.0f);
+	//Gets the position of where the rocket will start, the direction it will head, speed of the rocket
+	rocket->SetPosition((node->GetPosition()) + node->GetForward()*3.0f);
 	rocket->SetOrientation(node->GetOrientation());
 	rocket->SetDir(node->GetForward());
 	rocket->SetSpeed(0.25f);
+
+	rocket->AddChild(rocketEffect);
+
+	rocketEffect->SetPosition(-1.0f * rocket->GetForward());
+	rocketEffect->SetOrientation(rocket->GetOrientation() + glm::quat(rocket->GetUp(), glm::vec3(3.5, 5.0, 0.0)));
 }
 
 
