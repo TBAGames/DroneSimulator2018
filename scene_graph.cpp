@@ -54,14 +54,14 @@ void SceneGraph::AddNode(SceneNode *node){
 
 	node_.insert(node_.end(), subTreeNodes->begin(), subTreeNodes->end());
 }
+
+
 void SceneGraph::RemoveNode(SceneNode *node)
 {
 	for (int i = 0; i < node_.size(); i++) {
 		if (node_[i] == node) { node_.erase(node_.begin() + i); }
 	}
 }
-
-
 
 SceneNode *SceneGraph::GetNode(std::string node_name) const {
 

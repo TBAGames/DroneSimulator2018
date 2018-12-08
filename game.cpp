@@ -307,7 +307,6 @@ void Game::MainLoop(void){
 
 				camera_.Update();
 				GameObjectUpdate();
-<<<<<<< HEAD
 
 				SceneNode * proj = scene_.GetNode("Projectiles");
 				for (int i = 0; i < proj->GetChildren().size(); i++)
@@ -323,11 +322,8 @@ void Game::MainLoop(void){
 
 				
                 last_time = current_time;
-=======
-				CheckCollisions();
 
-        last_time = current_time;
->>>>>>> 8ebffe6ffa68c756caa3ec01985b7e6976f0b21c
+				CheckCollisions();
             }
         }
 
