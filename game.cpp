@@ -287,6 +287,19 @@ void Game::MainLoop(void){
 
 				camera_.Update();
 				GameObjectUpdate();
+
+				SceneNode * proj = scene_.GetNode("Projectiles");
+				for (int i = 0; i < proj->GetChildren().size(); i++)
+				{
+					SceneNode * projNode = scene_.GetNode("Projectiles")->GetChildren()[i];
+					if (glm::distance(node->GetPosition(), scene_.GetNode("Projectiles")->GetChildren()[i]->GetPosition()) > 100.0f) 
+					{
+						scene_.GetNode("Projectiles")->RemoveChild(projNode);
+						scene_.RemoveNode(projNode);
+						delete projNode;
+					}
+				}
+
 				
                 last_time = current_time;
             }

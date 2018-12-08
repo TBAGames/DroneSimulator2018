@@ -14,6 +14,14 @@ namespace game {
 		direction_ = direction;
 	}
 
+	void Bullet::DestroyProjectile(bool condition)
+	{
+		if (condition)
+		{
+			delete this;
+		}
+	}
+
 	void Bullet::Update(void) {
 		Translate(direction_ * speed_);
 	}

@@ -62,8 +62,14 @@ SceneNode::SceneNode(const std::string name) {
 }
 
 
-SceneNode::~SceneNode(){
+SceneNode::~SceneNode()
+{
+	for (int i = 0; i < GetChildren().size(); i++) 
+	{
+		delete GetChildren()[i];
+	}	
 }
+
 
 
 const std::string SceneNode::GetName(void) const {
@@ -87,6 +93,8 @@ glm::vec3 SceneNode::GetScale(void) const {
 
     return scale_;
 }
+
+
 
 
 void SceneNode::SetPosition(glm::vec3 position){

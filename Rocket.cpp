@@ -13,6 +13,13 @@ namespace game {
 	{
 		direction_ = direction;
 	}
+	void Rocket::DestroyProjectile(bool condition) 
+	{
+		if (condition) 
+		{
+			delete this;
+		}
+	}
 
 	void Rocket::Update(void) {
 		Translate(direction_ * speed_);

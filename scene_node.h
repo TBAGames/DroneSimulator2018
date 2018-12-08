@@ -84,6 +84,7 @@ namespace game {
 
 			// Recursively grab the subtree with root this
 			std::vector<SceneNode *> *BuildNodeSubTree(std::vector<SceneNode *> *buildTree);
+			void DeleteChildren(void);
 
 			// For dynamic objects
 			float speed_ = 1.0f;
