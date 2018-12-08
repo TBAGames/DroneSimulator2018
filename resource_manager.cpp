@@ -25,7 +25,7 @@ void ResourceManager::AddResource(ResourceType type, const std::string name, GLu
 
     res = new Resource(type, name, resource, size);
 
-	std::cout << name << resource << " " << res->GetType() << std::endl;
+	//std::cout << name << resource << " " << res->GetType() << std::endl;
     resource_.push_back(res);
 }
 
