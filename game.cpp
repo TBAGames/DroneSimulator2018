@@ -221,8 +221,6 @@ void Game::SetupScene(void){
 
 	camera_.SwitchCameraMode();
 
-	game::SceneNode *ship = CreateAsteroidInstance("Ship", "CubeMesh", "ShinyBlueMaterial");
-
 	ship->AddChild(arms1);
 	ship->AddChild(arms2);
 	arms1->AddChild(propel1);

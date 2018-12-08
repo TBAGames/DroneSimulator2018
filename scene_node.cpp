@@ -385,7 +385,6 @@ void SceneNode::Update(void){
 	}
 }
 
-
 void SceneNode::SetSpeed(float speed) {
 	speed_ = speed;
 }
