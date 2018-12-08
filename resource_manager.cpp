@@ -152,6 +152,82 @@ std::string ResourceManager::LoadTextFile(const char *filename){
     return content;
 }
 
+// Store information of one model for rendering
+typedef struct model {
+	GLuint vbo; // OpenGL vertex buffer object
+	GLuint ebo; // OpenGL element buffer object
+	GLuint size; // Size of data to be drawn
+} Model;
+
+// Create the geometry of a cube centered at (0, 0, 0) with sides of length 1
+void ResourceManager::CreateCube(std::string object_name) {
+
+	// The construction does not use shared vertices, since we need to assign appropriate normals to each face to create sharp edges
+	// Each face of the cube is defined by four vertices (with the same normal) and two triangles
+
+	int face_num = 6;
+	int face_att = 9;
+
+	// Vertices that form the cube
+	// 9 attributes per vertex: 3D position (3), 3D normal (3), RGB color (3)
+	GLfloat vertex[] = {
+		// First cube face (two triangles)
+		-0.5, -0.5,  0.5,    0.0,  0.0,  1.0,    0.0, 0.0, 1.0,
+		0.5, -0.5,  0.5,    0.0,  0.0,  1.0,    1.0, 0.0, 1.0,
+		0.5,  0.5,  0.5,    0.0,  0.0,  1.0,    1.0, 1.0, 1.0,
+		0.5,  0.5,  0.5,    0.0,  0.0,  1.0,    1.0, 1.0, 1.0,
+		-0.5,  0.5,  0.5,    0.0,  0.0,  1.0,    0.0, 1.0, 0.0,
+		-0.5, -0.5,  0.5,    0.0,  0.0,  1.0,    0.0, 0.0, 1.0,
+		// Second cube face
+		0.5, -0.5,  0.5,    1.0,  0.0,  0.0,    1.0, 0.0, 1.0,
+		0.5, -0.5, -0.5,    1.0,  0.0,  0.0,    1.0, 0.0, 0.0,
+		0.5,  0.5, -0.5,    1.0,  0.0,  0.0,    1.0, 1.0, 0.0,
+		0.5,  0.5, -0.5,    1.0,  0.0,  0.0,    1.0, 1.0, 0.0,
+		0.5,  0.5,  0.5,    1.0,  0.0,  0.0,    1.0, 1.0, 1.0,
+		0.5, -0.5,  0.5,    1.0,  0.0,  0.0,    1.0, 0.0, 1.0,
+		// Third cube face
+		0.5, -0.5, -0.5,    0.0,  0.0, -1.0,    1.0, 0.0, 0.0,
+		-0.5, -0.5, -0.5,    0.0,  0.0, -1.0,    0.0, 0.0, 1.0,
+		-0.5,  0.5, -0.5,    0.0,  0.0, -1.0,    0.0, 1.0, 0.0,
+		-0.5,  0.5, -0.5,    0.0,  0.0, -1.0,    0.0, 1.0, 0.0,
+		0.5,  0.5, -0.5,    0.0,  0.0, -1.0,    1.0, 1.0, 0.0,
+		0.5, -0.5, -0.5,    0.0,  0.0, -1.0,    1.0, 0.0, 0.0,
+		// Fourth cube face
+		-0.5, -0.5, -0.5,   -1.0,  0.0,  0.0,    0.0, 0.0, 1.0,
+		-0.5, -0.5,  0.5,   -1.0,  0.0,  0.0,    0.0, 0.0, 1.0,
+		-0.5,  0.5,  0.5,   -1.0,  0.0,  0.0,    0.0, 1.0, 0.0,
+		-0.5,  0.5,  0.5,   -1.0,  0.0,  0.0,    0.0, 1.0, 0.0,
+		-0.5,  0.5, -0.5,   -1.0,  0.0,  0.0,    0.0, 1.0, 0.0,
+		-0.5, -0.5, -0.5,   -1.0,  0.0,  0.0,    0.0, 0.0, 1.0,
+		// Fifth cube face
+		-0.5,  0.5,  0.5,    0.0,  1.0,  0.0,    0.0, 1.0, 0.0,
+		0.5,  0.5,  0.5,    0.0,  1.0,  0.0,    1.0, 1.0, 1.0,
+		0.5,  0.5, -0.5,    0.0,  1.0,  0.0,    1.0, 1.0, 0.0,
+		0.5,  0.5, -0.5,    0.0,  1.0,  0.0,    1.0, 1.0, 0.0,
+		-0.5,  0.5, -0.5,    0.0,  1.0,  0.0,    0.0, 1.0, 0.0,
+		-0.5,  0.5,  0.5,    0.0,  1.0,  0.0,    0.0, 1.0, 0.0,
+		// Sixth cube face
+		0.5, -0.5,  0.5,    0.0, -1.0,  0.0,    1.0, 0.0, 1.0,
+		-0.5, -0.5,  0.5,    0.0, -1.0,  0.0,    0.0, 0.0, 1.0,
+		-0.5, -0.5, -0.5,    0.0, -1.0,  0.0,    0.0, 0.0, 1.0,
+		-0.5, -0.5, -0.5,    0.0, -1.0,  0.0,    0.0, 0.0, 1.0,
+		0.5, -0.5, -0.5,    0.0, -1.0,  0.0,    1.0, 0.0, 0.0,
+		0.5, -0.5,  0.5,    0.0, -1.0,  0.0,    1.0, 0.0, 1.0,
+	};
+
+	// Create model 
+	Model *model;
+	model = new Model;
+	model->size = sizeof(vertex) / (sizeof(GLfloat) * 9);
+
+	// Create OpenGL vertex buffer for model
+	glGenBuffers(1, &model->vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, model->vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
+
+	// Create resource
+	AddResource(Mesh, object_name, model->vbo, model->ebo, face_num * face_att);
+}
 
 void ResourceManager::CreateTorus(std::string object_name, float loop_radius, float circle_radius, int num_loop_samples, int num_circle_samples){
 

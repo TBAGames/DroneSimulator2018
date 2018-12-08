@@ -150,9 +150,18 @@ void Game::SetupResources(void){
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/textured_material");
     resman_.LoadResource(Material, "TexturedMaterial", filename.c_str());
 
+	// Load building mesh from obj
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/building.obj");
+	resman_.LoadResource(Mesh, "BuildingMesh", filename.c_str());
+
+	// Load building texture
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/building_texture.png");
+	resman_.LoadResource(Texture, "BuildingTexture", filename.c_str());
+
 	// Load textures to be applied to the cylinder
 	filename = std::string(MATERIAL_DIRECTORY) + std::string("/crystal.jpg");
 	resman_.LoadResource(Texture, "Crystal", filename.c_str());
+
 	filename = std::string(MATERIAL_DIRECTORY) + std::string("/nebula.jpg");
 	resman_.LoadResource(Texture, "Nebula", filename.c_str());
 
@@ -163,6 +172,8 @@ void Game::SetupResources(void){
 	resman_.LoadResource(Material, "ObjectMaterial", filename.c_str());
 
 
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/asphalt.png");
+	resman_.LoadResource(Texture, "Asphalt", filename.c_str());
 }
 
 
@@ -208,28 +219,37 @@ void Game::SetupScene(void){
 	game::SceneNode *torus = CreateInstance("TorusInstance1", "TorusMesh", "ShinyBlueMaterial");
 	torus->Translate(glm::vec3(-1.5, -1.5, 0.0));
 
-	//std::cout << "Position Diff Before: " << glm::length(turretHead->GetPosition() - turretBase->GetPosition()) << std::endl;
-	//turretBase->Translate(glm::vec3(-0.5, 0.0, 0.0));
-	//std::cout << "Position Diff After: " << glm::length(turretHead->GetPosition() - turretBase->GetPosition()) << std::endl;
-	
-	//glm::quat turret_rotation = glm::angleAxis(-90.0f * -glm::pi<float>() / 180.0f, glm::vec3(1.0, 0.0, 0.0));
-	//turret->Rotate(turret_rotation);
-    //turret->Translate(glm::vec3(-1.4, 0.0, 0.0));
-
     // Create an instance of the textured cube
-    game::SceneNode *cube = CreateInstance("CubeInstance1", "CubeMesh", "TexturedMaterial", "Checker");
-	//camera_.AddChild(cube);
+    //game::SceneNode *cube = CreateInstance("CubeInstance1", "CubeMesh", "TexturedMaterial", "Checker");
 
     // Adjust the instance
-    cube->Scale(glm::vec3(0.7, 0.7, 0.7));
-    glm::quat cube_rotation = glm::angleAxis(-45.0f * -glm::pi<float>()/180.0f, glm::vec3(1.0, 0.0, 0.0));
-    //cube->Pitch(-45.0f * -glm::pi<float>() / 180.0f);
-    cube_rotation = glm::angleAxis(-45.0f * -glm::pi<float>()/180.0f, glm::vec3(0.0, 1.0, 0.0));
-    //cube->Yaw(-45.0f * -glm::pi<float>() / 180.0f);
-    cube->Translate(glm::vec3(0.0, 0.0, -1.0));
 
 	game::SceneNode *projectileContainer = CreateInstance("Projectiles", "CubeMesh", "ShinyBlueMaterial");
 	projectileContainer->SetScale(0.001f*glm::vec3(1.0, 1.0, 1.0));
+    //cube->Scale(glm::vec3(0.7, 0.7, 0.7));
+    //glm::quat cube_rotation = glm::angleAxis(-45.0f * -glm::pi<float>()/180.0f, glm::vec3(1.0, 0.0, 0.0));
+    //cube_rotation = glm::angleAxis(-45.0f * -glm::pi<float>()/180.0f, glm::vec3(0.0, 1.0, 0.0));
+    //cube->Translate(glm::vec3(0.0, 0.0, -1.0));
+
+	// Create ground
+	game::SceneNode *ground = CreateInstance("Ground", "CubeMesh", "TexturedMaterial", "Asphalt");
+	ground->SetPosition(ship->GetPosition() - glm::vec3(0.0, -50.0, 0.0));
+	ground->SetOrientation(ship->GetOrientation());
+	ground->SetScale(glm::vec3(500.0f, 0.1f, 500.0f));
+
+
+	// Create Buildings
+	int numBuildings = 15;
+	for (int i = 0; i < numBuildings; i++)
+	{
+		for (int j = 0; j < numBuildings; j++)
+		{
+			game::SceneNode *building = CreateInstance("Building" + (i*numBuildings)+j, "CubeMesh", "TexturedMaterial", "BuildingTexture");
+			ground->AddChild(building);
+			building->SetScale(glm::vec3(5.0, 100.0, 5.0));
+			building->SetPosition(glm::vec3(100.0*(i-(int)(numBuildings/2)), 50.0, 100.0*(j-(int)(numBuildings/2))));
+		}
+	}
 }
 
 
@@ -287,6 +307,7 @@ void Game::MainLoop(void){
 
 				camera_.Update();
 				GameObjectUpdate();
+<<<<<<< HEAD
 
 				SceneNode * proj = scene_.GetNode("Projectiles");
 				for (int i = 0; i < proj->GetChildren().size(); i++)
@@ -302,6 +323,11 @@ void Game::MainLoop(void){
 
 				
                 last_time = current_time;
+=======
+				CheckCollisions();
+
+        last_time = current_time;
+>>>>>>> 8ebffe6ffa68c756caa3ec01985b7e6976f0b21c
             }
         }
 
@@ -314,6 +340,44 @@ void Game::MainLoop(void){
         // Update other events like input handling
         glfwPollEvents();
     }
+}
+
+void Game::CheckCollisions(void)
+{
+	SceneNode *ship = scene_.GetNode("Ship");
+	std::vector<SceneNode *> buildings = scene_.GetNode("Ground")->GetChildren();
+	//std::vector<SceneNode *>::const_iterator i;
+
+	for (std::vector<SceneNode *>::const_iterator ptr = buildings.begin(); ptr < buildings.end(); ptr++)
+	{
+		if (IsCollidingBuilding(ship, *ptr))
+		{
+			std::cout << "Colliding" << std::endl;
+		}
+	}
+}
+
+bool Game::IsCollidingBuilding(SceneNode * ship, SceneNode *building)
+{
+	glm::vec3 s = ship->GetPosition();
+	glm::vec3 b = building->GetPosition();
+	glm::vec3 bScale = building->GetScale();
+
+	float bXMax = b.x + bScale.x;
+	float bXMin = b.x - bScale.x;
+	float bYMax = b.y + bScale.y;
+	float bYMin = b.y - bScale.y;
+	float bZMax = b.z + bScale.z;
+	float bZMin = b.z - bScale.z;
+
+	if (s.x > bXMin && s.x < bXMax &&
+		s.y > bYMin && s.y < bYMax &&
+		s.z > bZMin && s.z < bZMax)
+	{
+		return true;
+	}
+
+	return false;
 }
 
 
