@@ -127,10 +127,13 @@ void Game::InitEventHandlers(void){
 
 void Game::SetupResources(void){
 
+	//Create Sphere
+	resman_.CreateSphere("SimpleSphereMesh", 0.75, 10, 10);
+  
 	std::string filename;
 
-    // Create turret parts
-    resman_.CreateCylinder("TurretMesh");
+  // Create turret parts
+  resman_.CreateCylinder("TurretMesh");
 
 	// Create torus
 	resman_.CreateTorus("TorusMesh");
@@ -149,20 +152,20 @@ void Game::SetupResources(void){
 	// Create particles for explosion
 	resman_.CreateSphereParticles("SphereParticles");
 
-    // Load material to be applied to turret
-    filename = std::string(MATERIAL_DIRECTORY) + std::string("/metal");
-    resman_.LoadResource(Material, "ShinyBlueMaterial", filename.c_str());
+  // Load material to be applied to turret
+  filename = std::string(MATERIAL_DIRECTORY) + std::string("/metal");
+  resman_.LoadResource(Material, "ShinyBlueMaterial", filename.c_str());
 
-    // Load a cube from an obj file
-    filename = std::string(MATERIAL_DIRECTORY) + std::string("/cube.obj");
-    resman_.LoadResource(Mesh, "CubeMesh", filename.c_str());
+  // Load a cube from an obj file
+  filename = std::string(MATERIAL_DIRECTORY) + std::string("/cube.obj");
+  resman_.LoadResource(Mesh, "CubeMesh", filename.c_str());
 
-    // Load texture to be applied to the cube
-    filename = std::string(MATERIAL_DIRECTORY) + std::string("/checker.png");
-    resman_.LoadResource(Texture, "Checker", filename.c_str());
+  // Load texture to be applied to the cube
+  filename = std::string(MATERIAL_DIRECTORY) + std::string("/checker.png");
+  resman_.LoadResource(Texture, "Checker", filename.c_str());
 
-    // Load material to be applied to the cube
-    filename = std::string(MATERIAL_DIRECTORY) + std::string("/textured_material");
+  // Load material to be applied to the cube
+  filename = std::string(MATERIAL_DIRECTORY) + std::string("/textured_material");
 	resman_.LoadResource(Material, "TexturedMaterial", filename.c_str());
 
 	// Load building texture
@@ -199,7 +202,6 @@ void Game::SetupResources(void){
 	// Load material to be applied to skybox
 	filename = std::string(MATERIAL_DIRECTORY) + std::string("/skybox");
 	resman_.LoadResource(Material, "SkyboxMaterial", filename.c_str());
-
 }
 
 
@@ -209,12 +211,45 @@ void Game::SetupScene(void){
     scene_.SetBackgroundColor(viewport_background_color_g);
 
 	// Create Ship
-	game::SceneNode *ship = CreateAsteroidInstance("Ship", "CubeMesh", "ShinyBlueMaterial");
-	//camera_.SwitchCameraMode();
-	//camera_.SetCameraMode(CameraMode::FirstPerson);
-	//camera->SetPosition(FIRST_PERSON_CHILD_OFFSET);
+	SceneNode *ship = CreateAsteroidInstance("Ship", "SimpleSphereMesh", "ShinyBlueMaterial");
+	SceneNode *arms1 = CreateInstance("ShipArm1", "CubeMesh", "ShinyBlueMaterial");
+	SceneNode *arms2 = CreateInstance("ShipArm2", "CubeMesh", "ShinyBlueMaterial");
+	SceneNode *propel1 = CreateInstance("Pro1", "CubeMesh", "ShinyBlueMaterial");
+	SceneNode *propel2 = CreateInstance("Pro2", "CubeMesh", "ShinyBlueMaterial");
+	SceneNode *propel3 = CreateInstance("Pro3", "CubeMesh", "ShinyBlueMaterial");
+	SceneNode *propel4 = CreateInstance("Pro4", "CubeMesh", "ShinyBlueMaterial");
+
+	camera_.SwitchCameraMode();
+
+	ship->AddChild(arms1);
+	ship->AddChild(arms2);
+	arms1->AddChild(propel1);
+	arms1->AddChild(propel2);
+	arms2->AddChild(propel3);
+	arms2->AddChild(propel4);
+
+	//Propeller Position
+	propel1->Translate(glm::vec3(-1.75, -0.15, 0.0));
+	propel2->Translate(glm::vec3(1.75, -0.15, 0.0));
+	propel3->Translate(glm::vec3(0.0, -0.15, -1.75));
+	propel4->Translate(glm::vec3(0.0, -0.15, 1.75));
+
+	//Ship Arms Scaling
+	arms1->Scale(glm::vec3(2.0, 0.1, 0.25));
+	arms2->Scale(glm::vec3(0.25, 0.1, 2.0));
+
+	//Propeller Scaling
+	propel1->Scale(glm::vec3(0.5, 0.05, 0.1));
+	propel2->Scale(glm::vec3(0.5, 0.05, 0.1));
+	propel3->Scale(glm::vec3(0.1, 0.05, 0.5));
+	propel4->Scale(glm::vec3(0.1, 0.05, 0.5));
 
  //   // Create an instance of the turret
+	SceneNode *turretBase = CreateInstance("TurretBase", "TurretMesh", "TexturedMaterial", "Crystal");
+	SceneNode *turretHead = CreateInstance("TurretHead", "TurretMesh", "TexturedMaterial", "Nebula");
+	SceneNode *cannonBase = CreateInstance("CannonBase", "TurretMesh", "TexturedMaterial", "Crystal");
+	SceneNode *cannonHead = CreateInstance("CannonHead", "TurretMesh", "TexturedMaterial", "Nebula");
+
 	/*game::SceneNode *turretBase = CreateInstance("TurretBase", "TurretMesh", "TexturedMaterial", "Crystal");
 	game::SceneNode *turretHead = CreateInstance("TurretHead", "TurretMesh", "TexturedMaterial", "Nebula");
 	game::SceneNode *cannonBase = CreateInstance("CannonBase", "TurretMesh", "TexturedMaterial", "Crystal");
@@ -246,7 +281,7 @@ void Game::SetupScene(void){
 	torus->Translate(glm::vec3(-1.5, -1.5, 0.0));*/
 
     // Create an instance of the textured cube
-    //game::SceneNode *cube = CreateInstance("CubeInstance1", "CubeMesh", "TexturedMaterial", "Checker");
+    //SceneNode *cube = CreateInstance("CubeInstance1", "CubeMesh", "TexturedMaterial", "Checker");
 
     // Adjust the instance
 
@@ -258,7 +293,7 @@ void Game::SetupScene(void){
     //cube->Translate(glm::vec3(0.0, 0.0, -1.0));
 
 	// Create ground
-	game::SceneNode *ground = CreateInstance("Ground", "CubeMesh", "TexturedMaterial", "Asphalt");
+	SceneNode *ground = CreateInstance("Ground", "CubeMesh", "TexturedMaterial", "Asphalt");
 	ground->SetPosition(ship->GetPosition() - glm::vec3(0.0, -50.0, 0.0));
 	ground->SetOrientation(ship->GetOrientation());
 	ground->SetScale(glm::vec3(500.0f, 0.1f, 500.0f));
@@ -273,7 +308,7 @@ void Game::SetupScene(void){
 	{
 		for (int j = 0; j < numBuildings; j++)
 		{
-			game::SceneNode *building = CreateInstance("Building" + (i*numBuildings)+j, "CubeMesh", "TexturedMaterial", "BuildingTexture");
+			SceneNode *building = CreateInstance("Building" + (i*numBuildings)+j, "CubeMesh", "TexturedMaterial", "BuildingTexture");
 			ground->AddChild(building);
 			building->SetScale(glm::vec3(5.0, 100.0, 5.0));
 			building->SetPosition(glm::vec3(100.0*(i-(int)(numBuildings/2)), 50.0, 100.0*(j-(int)(numBuildings/2))));
@@ -356,14 +391,27 @@ void Game::MainLoop(void){
                       delete projNode;
                     }
                   }
+                
+                
+                  // Rotate propeller blades
+                  std::vector<SceneNode *> children = node->GetChildren();
+                  for (std::vector<SceneNode *>::iterator ptr = children.begin(); ptr < children.end(); ptr++) {
+                    if ((*ptr)->GetName().find("arms")) {
+                      std::vector<SceneNode *> a_children = (*ptr)->GetChildren();
+                      for (std::vector<SceneNode *>::iterator ptr2 = a_children.begin(); ptr2 < a_children.end(); ptr2++) {							
+                        (*ptr2)->Yaw(30.0);
+                        (*ptr2)->Update();
+                      }
+                    }
+                  }
 
-
-                  last_time = current_time;
 
                   CheckCollisions();
                   skybox_->SetPosition(node->GetPosition());
-              }
+                
+                  last_time = current_time;
 
+              }
         }
 
         // Draw the scene
