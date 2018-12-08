@@ -62,8 +62,14 @@ SceneNode::SceneNode(const std::string name) {
 }
 
 
-SceneNode::~SceneNode(){
+SceneNode::~SceneNode()
+{
+	for (int i = 0; i < GetChildren().size(); i++) 
+	{
+		delete GetChildren()[i];
+	}	
 }
+
 
 
 const std::string SceneNode::GetName(void) const {
@@ -87,6 +93,8 @@ glm::vec3 SceneNode::GetScale(void) const {
 
     return scale_;
 }
+
+
 
 
 void SceneNode::SetPosition(glm::vec3 position){
@@ -277,10 +285,10 @@ void SceneNode::AddChild(SceneNode *child) {
 	
 	SceneNode *prevParent = child->GetParent();
 
-	std::cout << "Has Prev Parent? " << ((prevParent != NULL) ? "Yes" : "No") << std::endl;
+	//std::cout << "Has Prev Parent? " << ((prevParent != NULL) ? "Yes" : "No") << std::endl;
 
 	// Add node to tree
-	std::cout << "Here" << std::endl;
+	//std::cout << "Here" << std::endl;
 	child->SetParent(this);
 	children_.push_back(child);
 	std::string children = "Parent: " + ((this->GetParent() != NULL) ? this->GetParent()->GetName() : "?") + " -> " + this->GetName() + " -> Children: ";
@@ -288,7 +296,7 @@ void SceneNode::AddChild(SceneNode *child) {
 	{
 		children += children_.at(i)->GetName() + ", ";
 	}
-	std::cout << children << std::endl;
+	//std::cout << children << std::endl;
 }
 
 void SceneNode::SetParent(SceneNode *parent) {
@@ -367,13 +375,20 @@ void SceneNode::DrawGeometry(bool toonModeOn, float roughness)
 
 
 void SceneNode::Update(void){
-
     // Do nothing for this generic type of scene node
+	for (std::vector<SceneNode *>::const_iterator ptr = children_.begin(); ptr < children_.end(); ptr++)
+	{
+		(*ptr)->Update();
+	}
 }
 
 
+void SceneNode::SetSpeed(float speed) {
+	speed_ = speed;
+}
 
 void SceneNode::SetupShader(GLuint program, bool toonModeOn, float roughness){
+
 	 
     // Set attributes for shaders
     GLint vertex_att = glGetAttribLocation(program, "vertex");
@@ -412,13 +427,14 @@ void SceneNode::SetupShader(GLuint program, bool toonModeOn, float roughness){
 
 	GLint surface_roughness = glGetUniformLocation(program, "surface_roughness");
 	glUniform1f(surface_roughness, roughness);
+	glBindTexture(GL_TEXTURE_2D, texture_); // First texture we bind
 
     // Texture
     if (texture_){
         GLint tex = glGetUniformLocation(program, "texture_map");
         glUniform1i(tex, 0); // Assign the first texture to the map
         glActiveTexture(GL_TEXTURE0); 
-        glBindTexture(GL_TEXTURE_2D, texture_); // First texture we bind
+
 
 		if (!toonModeOn) {
 			// Define texture interpolation

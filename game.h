@@ -13,6 +13,9 @@
 #include "camera.h"
 #include "asteroid.h"
 #include "settings.h"
+#include "Bullet.h"
+#include "Bomb.h"
+#include "Rocket.h"
 
 namespace game {
 
@@ -51,6 +54,11 @@ namespace game {
 			// Get camera
 			Camera *GetCamera(void);
 
+			// Update non-camera objects
+			void GameObjectUpdate(void);
+
+			
+			
 
         private:
             // GLFW window
@@ -77,6 +85,7 @@ namespace game {
             // Methods to handle events
             static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
             static void ResizeCallback(GLFWwindow* window, int width, int height);
+			SceneNode *skybox_;
 
             // Asteroid field
             // Create instance of one asteroid
@@ -90,10 +99,27 @@ namespace game {
             // Create an instance of an object stored in the resource manager
             SceneNode *CreateInstance(std::string entity_name, std::string object_name, std::string material_name, std::string texture_name = "");
 
+			
+			//Shooting the machine gun
+			void FireMachineGun(void);
+			Bullet *CreateBullet(void);
+
+			//Dropping the bomb 
+			void DropBomb(void);
+			Bomb *CreateBomb(void);
+
+			//Firing the rockets
+			void EngageRockets(void);
+			Rocket *CreateRocket(void);
+
 			// Settings
 			Settings settings_;
 			bool IsToonModeOn(void);
 			float GetRoughness(void);
+
+			// Handle collisions between gameobjects
+			void CheckCollisions(void);
+			bool IsCollidingBuilding(SceneNode *ship, SceneNode *building);
 			
     }; // class Game
 

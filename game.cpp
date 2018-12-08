@@ -34,6 +34,9 @@ glm::vec3 camera_up_g(0.0, 1.0, 0.0);
 bool camswitch = false;
 int camview = 0;
 
+//Counter to limit the bombs dropped
+int counterB = 0;
+
 // Materials 
 const std::string material_directory_g = MATERIAL_DIRECTORY;
 
@@ -101,6 +104,7 @@ void Game::InitView(void){
 
     // Set up camera
     // Set current view
+	camera_.SwitchCameraMode();
     camera_.SetView(camera_position_g, camera_look_at_g, camera_up_g);
     // Set projection
     camera_.SetProjection(camera_fov_g, camera_near_clip_distance_g, camera_far_clip_distance_g, width, height);
@@ -124,16 +128,30 @@ void Game::InitEventHandlers(void){
 
 void Game::SetupResources(void){
 
+	std::string filename;
+
     // Create turret parts
     resman_.CreateCylinder("TurretMesh");
 
 	// Create torus
 	resman_.CreateTorus("TorusMesh");
 
+	// Load material to be applied to particles
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/smoke");
+	resman_.LoadResource(Material, "SmokeParticleMaterial", filename.c_str());
+
+	// Load material to be applied to particles
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/muzzle_flash");
+	resman_.LoadResource(Material, "MuzzleParticleMaterial", filename.c_str());
+
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/flame");
+	resman_.LoadResource(Material, "FireParticleMaterial", filename.c_str());
+
+	// Create particles for explosion
+	resman_.CreateSphereParticles("SphereParticles");
+
     // Load material to be applied to turret
-    //std::string filename = std::string(MATERIAL_DIRECTORY) + std::string("/three-term_shiny_blue");
-    std::string filename = std::string(MATERIAL_DIRECTORY) + std::string("/metal");
-    //std::string filename = std::string(MATERIAL_DIRECTORY) + std::string("/plastic");
+    filename = std::string(MATERIAL_DIRECTORY) + std::string("/metal");
     resman_.LoadResource(Material, "ShinyBlueMaterial", filename.c_str());
 
     // Load a cube from an obj file
@@ -146,13 +164,43 @@ void Game::SetupResources(void){
 
     // Load material to be applied to the cube
     filename = std::string(MATERIAL_DIRECTORY) + std::string("/textured_material");
-    resman_.LoadResource(Material, "TexturedMaterial", filename.c_str());
+	resman_.LoadResource(Material, "TexturedMaterial", filename.c_str());
+
+	// Load building texture
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/building_texture.jpg");
+	resman_.LoadResource(Texture, "BuildingTexture", filename.c_str());
 
 	// Load textures to be applied to the cylinder
 	filename = std::string(MATERIAL_DIRECTORY) + std::string("/crystal.jpg");
 	resman_.LoadResource(Texture, "Crystal", filename.c_str());
+
 	filename = std::string(MATERIAL_DIRECTORY) + std::string("/nebula.jpg");
 	resman_.LoadResource(Texture, "Nebula", filename.c_str());
+
+	// Create a simple sphere to represent the asteroids
+	resman_.CreateSphere("SimpleSphereMesh", 0.5, 10, 10);
+
+	// Load material to be applied to asteroids
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/material");
+	resman_.LoadResource(Material, "ObjectMaterial", filename.c_str());
+
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/asphalt.png");
+	resman_.LoadResource(Texture, "Asphalt", filename.c_str());
+
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/smoke.png");
+	resman_.LoadResource(Texture, "Smoke", filename.c_str());
+
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/fire.png");
+	resman_.LoadResource(Texture, "Fire", filename.c_str());
+
+	// Load cube map to be applied to skybox
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/island/island.tga");
+	resman_.LoadResource(CubeMap, "LakeCubeMap", filename.c_str());
+
+	// Load material to be applied to skybox
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/skybox");
+	resman_.LoadResource(Material, "SkyboxMaterial", filename.c_str());
+
 }
 
 
@@ -163,12 +211,12 @@ void Game::SetupScene(void){
 
 	// Create Ship
 	game::SceneNode *ship = CreateAsteroidInstance("Ship", "CubeMesh", "ShinyBlueMaterial");
-	camera_.SwitchCameraMode();
+	//camera_.SwitchCameraMode();
 	//camera_.SetCameraMode(CameraMode::FirstPerson);
 	//camera->SetPosition(FIRST_PERSON_CHILD_OFFSET);
 
  //   // Create an instance of the turret
-	game::SceneNode *turretBase = CreateInstance("TurretBase", "TurretMesh", "TexturedMaterial", "Crystal");
+	/*game::SceneNode *turretBase = CreateInstance("TurretBase", "TurretMesh", "TexturedMaterial", "Crystal");
 	game::SceneNode *turretHead = CreateInstance("TurretHead", "TurretMesh", "TexturedMaterial", "Nebula");
 	game::SceneNode *cannonBase = CreateInstance("CannonBase", "TurretMesh", "TexturedMaterial", "Crystal");
 	game::SceneNode *cannonHead = CreateInstance("CannonHead", "TurretMesh", "TexturedMaterial", "Nebula");
@@ -197,6 +245,7 @@ void Game::SetupScene(void){
 
 	// Create Torus
 	game::SceneNode *torus = CreateInstance("TorusInstance1", "TorusMesh", "ShinyBlueMaterial");
+<<<<<<< HEAD
 	torus->Translate(glm::vec3(-1.5, -1.5, 0.0));
 
 	//createbirb
@@ -212,20 +261,52 @@ void Game::SetupScene(void){
 	glm::quat turret_rotation = glm::angleAxis(-90.0f * -glm::pi<float>() / 180.0f, glm::vec3(1.0, 0.0, 0.0));
 	//turret->Rotate(turret_rotation);
     //turret->Translate(glm::vec3(-1.4, 0.0, 0.0));
+=======
+	torus->Translate(glm::vec3(-1.5, -1.5, 0.0));*/
+>>>>>>> master
 
     // Create an instance of the textured cube
-    game::SceneNode *cube = CreateInstance("CubeInstance1", "CubeMesh", "TexturedMaterial", "Checker");
-	//camera_.AddChild(cube);
+    //game::SceneNode *cube = CreateInstance("CubeInstance1", "CubeMesh", "TexturedMaterial", "Checker");
 
     // Adjust the instance
-    cube->Scale(glm::vec3(0.7, 0.7, 0.7));
-    glm::quat cube_rotation = glm::angleAxis(-45.0f * -glm::pi<float>()/180.0f, glm::vec3(1.0, 0.0, 0.0));
-    //cube->Pitch(-45.0f * -glm::pi<float>() / 180.0f);
-    cube_rotation = glm::angleAxis(-45.0f * -glm::pi<float>()/180.0f, glm::vec3(0.0, 1.0, 0.0));
-    //cube->Yaw(-45.0f * -glm::pi<float>() / 180.0f);
-    cube->Translate(glm::vec3(0.0, 0.0, -1.0));
 
+	game::SceneNode *projectileContainer = CreateInstance("Projectiles", "CubeMesh", "ShinyBlueMaterial");
+	projectileContainer->SetScale(0.001f*glm::vec3(1.0, 1.0, 1.0));
+    //cube->Scale(glm::vec3(0.7, 0.7, 0.7));
+    //glm::quat cube_rotation = glm::angleAxis(-45.0f * -glm::pi<float>()/180.0f, glm::vec3(1.0, 0.0, 0.0));
+    //cube_rotation = glm::angleAxis(-45.0f * -glm::pi<float>()/180.0f, glm::vec3(0.0, 1.0, 0.0));
+    //cube->Translate(glm::vec3(0.0, 0.0, -1.0));
 
+	// Create ground
+	game::SceneNode *ground = CreateInstance("Ground", "CubeMesh", "TexturedMaterial", "Asphalt");
+	ground->SetPosition(ship->GetPosition() - glm::vec3(0.0, -50.0, 0.0));
+	ground->SetOrientation(ship->GetOrientation());
+	ground->SetScale(glm::vec3(500.0f, 0.1f, 500.0f));
+
+	skybox_ = CreateInstance("CubeInstance1", "CubeMesh", "SkyboxMaterial");
+	skybox_->Scale(glm::vec3(50.0, 50.0, 50.0));
+	skybox_->Roll(glm::pi<float>());
+
+	// Create Buildings
+	/*int numBuildings = 1;
+	for (int i = 0; i < numBuildings; i++)
+	{
+		for (int j = 0; j < numBuildings; j++)
+		{
+			game::SceneNode *building = CreateInstance("Building" + (i*numBuildings)+j, "CubeMesh", "TexturedMaterial", "BuildingTexture");
+			ground->AddChild(building);
+			building->SetScale(glm::vec3(5.0, 100.0, 5.0));
+			building->SetPosition(glm::vec3(100.0*(i-(int)(numBuildings/2)), 50.0, 100.0*(j-(int)(numBuildings/2))));
+		}
+	}*/
+
+	//game::SceneNode *particles1 = CreateInstance("ParticleInstance1", "SphereParticles", "ParticleMaterial", "Smoke");
+	//game::SceneNode *particles2 = CreateInstance("ParticleInstance2", "SphereParticles", "ParticleMaterial");
+	//game::SceneNode *particles3 = CreateInstance("ParticleInstance3", "SphereParticles", "ParticleMaterial");
+
+	//particles1->Translate(ship->GetPosition() + ship->GetForward() * 10.0f);
+	//particles2->Translate(ship->GetPosition() + glm::vec3(0.5, 0.5, 0.0));
+	//particles3->Translate(ship->GetPosition() + glm::vec3(-0.5, -0.5, 0.0));
 }
 
 
@@ -265,6 +346,7 @@ void Game::MainLoop(void){
     while (!glfwWindowShouldClose(window_)){
         // Animate the scene
         if (animating_){
+<<<<<<< HEAD
             static double last_time = 0;
             double current_time = glfwGetTime();
             if ((current_time - last_time) > 0.01){
@@ -289,6 +371,46 @@ void Game::MainLoop(void){
 
                 last_time = current_time;
             }
+=======
+              static double last_time = 0;
+              double current_time = glfwGetTime();
+              if ((current_time - last_time) > 0.01){
+
+                          // Animate the turret
+                  SceneNode *node;
+                  glm::quat rotation;
+
+                          // Animate the ship
+                          node = scene_.GetNode("Ship");
+                  node->Pitch(rotation_factor*rotation_degree_pitch);
+                  node->Yaw(rotation_factor*rotation_degree_yaw);
+                  node->Roll(rotation_factor*rotation_degree_roll);
+                  node->Translate((node->GetForward()/100.0f) * float(movement_degree_fwd));
+                  node->Translate((node->GetUp() / 100.0f) * float(movement_degree_up));
+
+                  camera_.Update();
+                  GameObjectUpdate();
+
+                  SceneNode * proj = scene_.GetNode("Projectiles");
+                  for (int i = 0; i < proj->GetChildren().size(); i++)
+                  {
+                    SceneNode * projNode = scene_.GetNode("Projectiles")->GetChildren()[i];
+                    if (glm::distance(node->GetPosition(), scene_.GetNode("Projectiles")->GetChildren()[i]->GetPosition()) > 100.0f) 
+                    {
+                      scene_.GetNode("Projectiles")->RemoveChild(projNode);
+                      scene_.RemoveNode(projNode);
+                      delete projNode;
+                    }
+                  }
+
+
+                  last_time = current_time;
+
+                  CheckCollisions();
+                  skybox_->SetPosition(node->GetPosition());
+              }
+
+>>>>>>> master
         }
 
         // Draw the scene
@@ -302,12 +424,51 @@ void Game::MainLoop(void){
     }
 }
 
+void Game::CheckCollisions(void)
+{
+	SceneNode *ship = scene_.GetNode("Ship");
+	std::vector<SceneNode *> buildings = scene_.GetNode("Ground")->GetChildren();
+	//std::vector<SceneNode *>::const_iterator i;
+
+	for (std::vector<SceneNode *>::const_iterator ptr = buildings.begin(); ptr < buildings.end(); ptr++)
+	{
+		if (IsCollidingBuilding(ship, *ptr))
+		{
+			std::cout << "Colliding" << std::endl;
+		}
+	}
+}
+
+bool Game::IsCollidingBuilding(SceneNode * ship, SceneNode *building)
+{
+	glm::vec3 s = ship->GetPosition();
+	glm::vec3 b = building->GetPosition();
+	glm::vec3 bScale = building->GetScale();
+
+	float bXMax = b.x + bScale.x;
+	float bXMin = b.x - bScale.x;
+	float bYMax = b.y + bScale.y;
+	float bYMin = b.y - bScale.y;
+	float bZMax = b.z + bScale.z;
+	float bZMin = b.z - bScale.z;
+
+	if (s.x > bXMin && s.x < bXMax &&
+		s.y > bYMin && s.y < bYMax &&
+		s.z > bZMin && s.z < bZMax)
+	{
+		return true;
+	}
+
+	return false;
+}
+
 
 void Game::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
 
     // Get user data with a pointer to the game class
     void* ptr = glfwGetWindowUserPointer(window);
     Game *game = (Game *) ptr;
+	
 
     // Quit game if 'q' is pressed
     if (key == GLFW_KEY_Q && action == GLFW_PRESS){
@@ -318,6 +479,28 @@ void Game::KeyCallback(GLFWwindow* window, int key, int scancode, int action, in
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS){
         game->animating_ = (game->animating_ == true) ? false : true;
     }
+
+	//Fire the turret
+	if (key == GLFW_KEY_O && action == GLFW_PRESS) {
+		game->FireMachineGun();
+	}
+
+	//Drop the bombs, it it isn't depleted
+	if (counterB < 3)
+	{
+		if (key == GLFW_KEY_ENTER && action == GLFW_PRESS) {
+			game->DropBomb();
+			counterB++;
+			std::cout <<"Bombs Left: " << 3-counterB << std::endl;
+
+		}
+	}
+
+	//Launch the rockets
+	if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+		game->EngageRockets();
+	}
+	
 
     // View control
     float rot_factor(glm::pi<float>() / 180);
@@ -467,7 +650,7 @@ void Game::CreateAsteroidField(int num_asteroids){
         std::string name = "AsteroidInstance" + index;
 
         // Create asteroid instance
-        Asteroid *ast = CreateAsteroidInstance(name, "SimpleSphereMesh", "ObjectMaterial");
+        Asteroid *ast = CreateAsteroidInstance(name, "SimpleSphereMesh", "ShinyBlueMaterial");
 
         // Set attributes of asteroid: random position, orientation, and
         // angular momentum
@@ -476,6 +659,7 @@ void Game::CreateAsteroidField(int num_asteroids){
         ast->SetAngM(glm::normalize(glm::angleAxis(0.05f*glm::pi<float>()*((float) rand() / RAND_MAX), glm::vec3(((float) rand() / RAND_MAX), ((float) rand() / RAND_MAX), ((float) rand() / RAND_MAX)))));
     }
 }
+
 
 
 SceneNode *Game::CreateInstance(std::string entity_name, std::string object_name, std::string material_name, std::string texture_name){
@@ -500,7 +684,7 @@ SceneNode *Game::CreateInstance(std::string entity_name, std::string object_name
 
     SceneNode *scn = scene_.CreateNode(entity_name, geom, mat, tex);
 
-	//By default, add new node to scene
+	//By default, add new node as a child of scene
 	scene_.AddNode(scn);
     return scn;
 }
@@ -509,6 +693,159 @@ SceneNode *Game::CreateInstance(std::string entity_name, std::string object_name
 
 Camera *Game::GetCamera() {
 	return &camera_;
+}
+
+ 
+void Game::FireMachineGun()
+{
+	//Create an instance of the bullet 
+	Bullet *bullet = CreateBullet();
+	SceneNode *node = scene_.GetNode("Ship");
+	SceneNode *projectileContainer = scene_.GetNode("Projectiles");
+	SceneNode *bulletEffect = CreateInstance("ParticleInstance1", "SphereParticles", "MuzzleParticleMaterial");
+
+	projectileContainer->AddChild(bullet);
+
+	//Gets the position of where the bullet will start, the direction it will head, speed of the bullet
+	bullet->SetPosition(node->GetPosition() + node->GetForward()*3.0f);
+	bullet->SetOrientation(node->GetOrientation());
+	bullet->SetDir(node->GetForward());
+	bullet->SetSpeed(2.5f);
+
+	bullet->AddChild(bulletEffect);
+
+	bulletEffect->SetPosition(-1.0f * bullet->GetForward());
+	bulletEffect->SetOrientation(bullet->GetOrientation());
+
+}
+
+void Game::DropBomb()
+{
+	//Create an instance of the bomb 
+	Bomb *bomb = CreateBomb();
+	SceneNode *node = scene_.GetNode("Ship");
+	SceneNode *projectileContainer = scene_.GetNode("Projectiles");
+	SceneNode *bombEffect = CreateInstance("ParticleInstance1", "SphereParticles", "SmokeParticleMaterial", "Smoke");
+
+	projectileContainer->AddChild(bomb);
+
+	//Gets the position of where the bomb will start, the direction it will head, speed of the bomb
+	bomb->SetPosition((node->GetPosition()) + node->GetUp()*-1.0f);
+	bomb->SetOrientation(node->GetOrientation());
+	bomb->SetDir(-(node->GetUp()));
+	bomb->SetSpeed(0.25f);
+
+	bomb->AddChild(bombEffect);
+
+	bombEffect->SetPosition(-3.0f * bomb->GetForward());
+	bombEffect->SetOrientation(bomb->GetOrientation());
+
+}
+
+void Game::EngageRockets()
+{
+	//Create an instance of the rocket 
+	Bomb *rocket = CreateBomb();
+	SceneNode *node = scene_.GetNode("Ship");
+	SceneNode *projectileContainer = scene_.GetNode("Projectiles");
+	SceneNode *rocketEffect = CreateInstance("ParticleInstance1", "SphereParticles", "FireParticleMaterial", "Fire");
+
+	projectileContainer->AddChild(rocket);
+
+	//Gets the position of where the rocket will start, the direction it will head, speed of the rocket
+	rocket->SetPosition((node->GetPosition()) + node->GetForward()*3.0f);
+	rocket->SetOrientation(node->GetOrientation());
+	rocket->SetDir(node->GetForward());
+	rocket->SetSpeed(0.25f);
+
+	rocket->AddChild(rocketEffect);
+
+	rocketEffect->SetPosition(-1.0f * rocket->GetForward());
+	rocketEffect->SetOrientation(rocket->GetOrientation() + glm::quat(rocket->GetUp(), glm::vec3(3.5, 5.0, 0.0)));
+}
+
+
+Bullet *Game::CreateBullet()
+{
+	std::string entity_name = "Bullet";
+	std::string object_name = "SimpleSphereMesh";
+	std::string material_name = "ShinyBlueMaterial";
+
+	Resource *geom = resman_.GetResource(object_name);
+	if (!geom) {
+		throw(GameException(std::string("Could not find resource \"") + object_name + std::string("\"")));
+	}
+
+	Resource *mat = resman_.GetResource(material_name);
+	if (!mat) {
+		throw(GameException(std::string("Could not find resource \"") + material_name + std::string("\"")));
+	}
+
+	// Create ship instance
+	Bullet *bullet = new Bullet(entity_name, geom, mat);
+	//scene_.AddNode(ast);
+
+	//std::cout << "Adding laser" << std::endl;
+	scene_.AddNode(bullet);
+
+	return bullet;
+}
+
+Bomb *Game::CreateBomb()
+{
+	std::string entity_name = "Bomb";
+	std::string object_name = "CubeMesh";
+	std::string material_name = "ShinyBlueMaterial";
+
+	Resource *geom = resman_.GetResource(object_name);
+	if (!geom) {
+		throw(GameException(std::string("Could not find resource \"") + object_name + std::string("\"")));
+	}
+
+	Resource *mat = resman_.GetResource(material_name);
+	if (!mat) {
+		throw(GameException(std::string("Could not find resource \"") + material_name + std::string("\"")));
+	}
+
+	// Create ship instance
+	Bomb *bomb = new Bomb(entity_name, geom, mat);
+	//scene_.AddNode(ast);
+
+	//std::cout << "Adding laser" << std::endl;
+	scene_.AddNode(bomb);
+
+	return bomb;
+}
+
+Rocket *Game::CreateRocket()
+{
+	std::string entity_name = "Rocket";
+	std::string object_name = "SimpleSphereMesh";
+	std::string material_name = "ShinyBlueMaterial";
+
+	Resource *geom = resman_.GetResource(object_name);
+	if (!geom) {
+		throw(GameException(std::string("Could not find resource \"") + object_name + std::string("\"")));
+	}
+
+	Resource *mat = resman_.GetResource(material_name);
+	if (!mat) {
+		throw(GameException(std::string("Could not find resource \"") + material_name + std::string("\"")));
+	}
+
+	// Create ship instance
+	Rocket *rocket = new Rocket(entity_name, geom, mat);
+	//scene_.AddNode(ast);
+
+	//std::cout << "Adding laser" << std::endl;
+	scene_.AddNode(rocket);
+
+	return rocket;
+}
+
+void Game::GameObjectUpdate(void) {
+
+	scene_.GetNode("Projectiles")->Update();
 }
 
 } // namespace game
