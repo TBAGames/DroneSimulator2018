@@ -33,7 +33,7 @@ void Enemy::beHAVE(void) //Required to be said like Austin Powers
 	//glm::vec3 forwardTowardsOrigin = glm::normalize(GetPosition() - getOrigin());
 	std::cout << distance << std::endl;
 	if (type == "Bird") {
-		if (distance < 50.0)
+		if (distance < 100.0)
 		{
 			setForward(forwardTowardsPlayer);
 			Translate(forwardTowardsPlayer);

@@ -263,7 +263,6 @@ void Game::SetupScene(void){
     //turret->Translate(glm::vec3(-1.4, 0.0, 0.0));
 =======
 	torus->Translate(glm::vec3(-1.5, -1.5, 0.0));*/
->>>>>>> master
 
     // Create an instance of the textured cube
     //game::SceneNode *cube = CreateInstance("CubeInstance1", "CubeMesh", "TexturedMaterial", "Checker");
@@ -287,18 +286,39 @@ void Game::SetupScene(void){
 	skybox_->Scale(glm::vec3(50.0, 50.0, 50.0));
 	skybox_->Roll(glm::pi<float>());
 
-	// Create Buildings
-	/*int numBuildings = 1;
-	for (int i = 0; i < numBuildings; i++)
+	//create enemies
+	int numEnemies = 3;
+	game::SceneNode *enemyContainer = CreateInstance("Enemies", "CubeMesh", "ShinyBlueMaterial");
+	for (int i = 0; i < numEnemies; i++) 
 	{
-		for (int j = 0; j < numBuildings; j++)
+		for (int j = 0; j < numEnemies; j++) 
 		{
-			game::SceneNode *building = CreateInstance("Building" + (i*numBuildings)+j, "CubeMesh", "TexturedMaterial", "BuildingTexture");
-			ground->AddChild(building);
-			building->SetScale(glm::vec3(5.0, 100.0, 5.0));
-			building->SetPosition(glm::vec3(100.0*(i-(int)(numBuildings/2)), 50.0, 100.0*(j-(int)(numBuildings/2))));
+			if (j % 2 == 0) 
+			{
+				Enemy *enemy = CreateEnemyInstance("Enemy" + (i*numEnemies) + j, "CubeMesh", "ShinyBlueMaterial", "BuildingTexture", glm::vec3(100.0*(i - (int)(numEnemies / 2)) + 25, 0.0, 100.0*(j - (int)(numEnemies / 2)) + 25),ship, "Bird"); 
+				enemyContainer->AddChild(enemy);
+			}
+			else 
+			{
+				Enemy *enemy = CreateEnemyInstance("Enemy" + (i*numEnemies) + j, "CubeMesh", "ShinyBlueMaterial", "BuildingTexture", glm::vec3(100.0*(i - (int)(numEnemies / 2)) + 25, 50.0f, 100.0*(j - (int)(numEnemies / 2)) + 25), ship, "Dog");
+				enemyContainer->AddChild(enemy);
+			}
 		}
-	}*/
+	}
+	//Enemy *Game::CreateEnemyInstance(std::string entity_name, std::string object_name, std::string material_name, std::string texture_name, glm::vec3 origin_point, SceneNode *player, std::string type) {
+
+	 //Create Buildings
+	//int numBuildings = 1;
+	//for (int i = 0; i < numBuildings; i++)
+	//{
+	//	for (int j = 0; j < numBuildings; j++)
+	//	{
+	//		game::SceneNode *building = CreateInstance("Building" + (i*numBuildings)+j, "CubeMesh", "TexturedMaterial", "BuildingTexture");
+	//		ground->AddChild(building);
+	//		building->SetScale(glm::vec3(5.0, 100.0, 5.0));
+	//		building->SetPosition(glm::vec3(100.0*(i-(int)(numBuildings/2)), 50.0, 100.0*(j-(int)(numBuildings/2))));
+	//	}
+	//}
 
 	//game::SceneNode *particles1 = CreateInstance("ParticleInstance1", "SphereParticles", "ParticleMaterial", "Smoke");
 	//game::SceneNode *particles2 = CreateInstance("ParticleInstance2", "SphereParticles", "ParticleMaterial");
@@ -346,32 +366,7 @@ void Game::MainLoop(void){
     while (!glfwWindowShouldClose(window_)){
         // Animate the scene
         if (animating_){
-<<<<<<< HEAD
-            static double last_time = 0;
-            double current_time = glfwGetTime();
-            if ((current_time - last_time) > 0.01){
 
-                // Animate the turret
-				SceneNode *node;
-				Enemy *enemy;
-				glm::quat rotation;
-
-                // Animate the ship
-                node = scene_.GetNode("Ship");
-				node->Pitch(rotation_factor*rotation_degree_pitch);
-				node->Yaw(rotation_factor*rotation_degree_yaw);
-				node->Roll(rotation_factor*rotation_degree_roll);
-				node->Translate((node->GetForward()/100.0f) * float(movement_degree_fwd));
-				node->Translate((node->GetUp() / 100.0f) * float(movement_degree_up));
-
-				node = scene_.GetNode("bird");
-				enemy = (Enemy*)node;
-				enemy->beHAVE();
-				camera_.Update();
-
-                last_time = current_time;
-            }
-=======
               static double last_time = 0;
               double current_time = glfwGetTime();
               if ((current_time - last_time) > 0.01){
@@ -381,7 +376,7 @@ void Game::MainLoop(void){
                   glm::quat rotation;
 
                           // Animate the ship
-                          node = scene_.GetNode("Ship");
+                  node = scene_.GetNode("Ship");
                   node->Pitch(rotation_factor*rotation_degree_pitch);
                   node->Yaw(rotation_factor*rotation_degree_yaw);
                   node->Roll(rotation_factor*rotation_degree_roll);
@@ -391,17 +386,14 @@ void Game::MainLoop(void){
                   camera_.Update();
                   GameObjectUpdate();
 
-                  SceneNode * proj = scene_.GetNode("Projectiles");
-                  for (int i = 0; i < proj->GetChildren().size(); i++)
-                  {
-                    SceneNode * projNode = scene_.GetNode("Projectiles")->GetChildren()[i];
-                    if (glm::distance(node->GetPosition(), scene_.GetNode("Projectiles")->GetChildren()[i]->GetPosition()) > 100.0f) 
-                    {
-                      scene_.GetNode("Projectiles")->RemoveChild(projNode);
-                      scene_.RemoveNode(projNode);
-                      delete projNode;
-                    }
-                  }
+				  SceneNode * enemyContainer = scene_.GetNode("Enemies");
+				  for (int i = 0; i < enemyContainer->GetChildren().size(); i++)
+				  {
+					  Enemy * enemy = (Enemy*)enemyContainer->GetChildren()[i];
+					  enemy->beHAVE();
+				  }
+
+				  //			enemyContainer->AddChild(enemy);
 
 
                   last_time = current_time;
@@ -410,7 +402,6 @@ void Game::MainLoop(void){
                   skybox_->SetPosition(node->GetPosition());
               }
 
->>>>>>> master
         }
 
         // Draw the scene
