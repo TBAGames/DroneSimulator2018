@@ -245,52 +245,16 @@ void Game::SetupScene(void){
 	propel4->Scale(glm::vec3(0.1, 0.05, 0.5));
 
  //   // Create an instance of the turret
+
 	SceneNode *turretBase = CreateInstance("TurretBase", "TurretMesh", "TexturedMaterial", "Crystal");
 	SceneNode *turretHead = CreateInstance("TurretHead", "TurretMesh", "TexturedMaterial", "Nebula");
 	SceneNode *cannonBase = CreateInstance("CannonBase", "TurretMesh", "TexturedMaterial", "Crystal");
 	SceneNode *cannonHead = CreateInstance("CannonHead", "TurretMesh", "TexturedMaterial", "Nebula");
 
-	/*game::SceneNode *turretBase = CreateInstance("TurretBase", "TurretMesh", "TexturedMaterial", "Crystal");
-	game::SceneNode *turretHead = CreateInstance("TurretHead", "TurretMesh", "TexturedMaterial", "Nebula");
-	game::SceneNode *cannonBase = CreateInstance("CannonBase", "TurretMesh", "TexturedMaterial", "Crystal");
-	game::SceneNode *cannonHead = CreateInstance("CannonHead", "TurretMesh", "TexturedMaterial", "Nebula");
-
-	// Turret Hierarchy
-	turretBase->AddChild(turretHead);
-	turretHead->AddChild(cannonBase);
-	cannonBase->AddChild(cannonHead);
-
-	// Translate the instances
-	turretBase->Translate(glm::vec3(-1.5, 0.0, 0.0));
-	turretHead->Translate(glm::vec3(0.0, 0.75, 0.0));
-	cannonBase->Translate(glm::vec3(0.5, 0.1, 0.0));
-	cannonHead->Translate(glm::vec3(0.5, 0.0, 0.0));
-
-	//// Rotate the instances
-	glm::quat cannonRot = glm::angleAxis(-glm::pi<float>() / 2.0f, glm::vec3(0.0, 0.0, 1.0));
-	cannonBase->Rotate(cannonRot);
-
-	//// Scale the instances
-	turretBase->Scale(glm::vec3(1.25, 0.5, 1.25));
-	turretHead->Scale(glm::vec3(2.5, 0.25, 2.5));
-	cannonBase->Scale(glm::vec3(0.3, 0.25, 0.3));
-	cannonHead->Scale(glm::vec3(0.15, 0.25, 0.15));
-
-	// Create Torus
-	game::SceneNode *torus = CreateInstance("TorusInstance1", "TorusMesh", "ShinyBlueMaterial");
-	torus->Translate(glm::vec3(-1.5, -1.5, 0.0));*/
-
-    // Create an instance of the textured cube
-    //SceneNode *cube = CreateInstance("CubeInstance1", "CubeMesh", "TexturedMaterial", "Checker");
-
     // Adjust the instance
 
 	game::SceneNode *projectileContainer = CreateInstance("Projectiles", "CubeMesh", "ShinyBlueMaterial");
 	projectileContainer->SetScale(0.001f*glm::vec3(1.0, 1.0, 1.0));
-    //cube->Scale(glm::vec3(0.7, 0.7, 0.7));
-    //glm::quat cube_rotation = glm::angleAxis(-45.0f * -glm::pi<float>()/180.0f, glm::vec3(1.0, 0.0, 0.0));
-    //cube_rotation = glm::angleAxis(-45.0f * -glm::pi<float>()/180.0f, glm::vec3(0.0, 1.0, 0.0));
-    //cube->Translate(glm::vec3(0.0, 0.0, -1.0));
 
 	// Create ground
 	SceneNode *ground = CreateInstance("Ground", "CubeMesh", "TexturedMaterial", "Asphalt");
@@ -303,7 +267,7 @@ void Game::SetupScene(void){
 	skybox_->Roll(glm::pi<float>());
 
 	// Create Buildings
-	/*int numBuildings = 1;
+	int numBuildings = 8;
 	for (int i = 0; i < numBuildings; i++)
 	{
 		for (int j = 0; j < numBuildings; j++)
@@ -313,16 +277,6 @@ void Game::SetupScene(void){
 			building->SetScale(glm::vec3(5.0, 100.0, 5.0));
 			building->SetPosition(glm::vec3(100.0*(i-(int)(numBuildings/2)), 50.0, 100.0*(j-(int)(numBuildings/2))));
 		}
-	}*/
-
-	//game::SceneNode *particles1 = CreateInstance("ParticleInstance1", "SphereParticles", "ParticleMaterial", "Smoke");
-	//game::SceneNode *particles2 = CreateInstance("ParticleInstance2", "SphereParticles", "ParticleMaterial");
-	//game::SceneNode *particles3 = CreateInstance("ParticleInstance3", "SphereParticles", "ParticleMaterial");
-
-	//particles1->Translate(ship->GetPosition() + ship->GetForward() * 10.0f);
-	//particles2->Translate(ship->GetPosition() + glm::vec3(0.5, 0.5, 0.0));
-	//particles3->Translate(ship->GetPosition() + glm::vec3(-0.5, -0.5, 0.0));
-
 
 	int numEnemies = 3;
 	game::SceneNode *enemyContainer = CreateInstance("Enemies", "CubeMesh", "ShinyBlueMaterial");
@@ -737,7 +691,7 @@ void Game::FireMachineGun()
 
 	bullet->AddChild(bulletEffect);
 
-	bulletEffect->SetPosition(-1.0f * bullet->GetForward());
+	bulletEffect->SetPosition(bullet->GetPosition() + -1.0f * bullet->GetForward());
 	bulletEffect->SetOrientation(bullet->GetOrientation());
 
 }
@@ -760,7 +714,7 @@ void Game::DropBomb()
 
 	bomb->AddChild(bombEffect);
 
-	bombEffect->SetPosition(-3.0f * bomb->GetForward());
+	bombEffect->SetPosition(bomb->GetPosition() + -3.0f * bomb->GetForward());
 	bombEffect->SetOrientation(bomb->GetOrientation());
 
 }
@@ -783,7 +737,7 @@ void Game::EngageRockets()
 
 	rocket->AddChild(rocketEffect);
 
-	rocketEffect->SetPosition(-1.0f * rocket->GetForward());
+	rocketEffect->SetPosition(rocket->GetPosition() + -1.0f * rocket->GetForward());
 	rocketEffect->SetOrientation(rocket->GetOrientation() + glm::quat(rocket->GetUp(), glm::vec3(3.5, 5.0, 0.0)));
 }
 

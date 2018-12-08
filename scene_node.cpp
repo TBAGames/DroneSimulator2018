@@ -147,7 +147,7 @@ void SceneNode::Translate(glm::vec3 trans){
 }
 
 void SceneNode::Rotate(glm::quat rot){
-	std::cout << "Rotating " << GetName() << std::endl;
+	//std::cout << "Rotating " << GetName() << std::endl;
     orientation_ *= rot;
     orientation_ = glm::normalize(orientation_);
 
