@@ -322,6 +322,26 @@ void Game::SetupScene(void){
 	//particles1->Translate(ship->GetPosition() + ship->GetForward() * 10.0f);
 	//particles2->Translate(ship->GetPosition() + glm::vec3(0.5, 0.5, 0.0));
 	//particles3->Translate(ship->GetPosition() + glm::vec3(-0.5, -0.5, 0.0));
+
+
+	int numEnemies = 3;
+	game::SceneNode *enemyContainer = CreateInstance("Enemies", "CubeMesh", "ShinyBlueMaterial");
+	for (int i = 0; i < numEnemies; i++)
+	{
+		for (int j = 0; j < numEnemies; j++)
+		{
+			if (j % 2 == 0)
+			{
+				Enemy *enemy = CreateEnemyInstance("Enemy" + (i*numEnemies) + j, "CubeMesh", "ShinyBlueMaterial", "BuildingTexture", glm::vec3(100.0*(i - (int)(numEnemies / 2)) + 25, 0.0, 100.0*(j - (int)(numEnemies / 2)) + 25), ship, "Bird");
+				enemyContainer->AddChild(enemy);
+			}
+			else
+			{
+				Enemy *enemy = CreateEnemyInstance("Enemy" + (i*numEnemies) + j, "CubeMesh", "ShinyBlueMaterial", "BuildingTexture", glm::vec3(100.0*(i - (int)(numEnemies / 2)) + 25, 50.0f, 100.0*(j - (int)(numEnemies / 2)) + 25), ship, "Dog");
+				enemyContainer->AddChild(enemy);
+			}
+		}
+	}
 }
 
 
@@ -390,6 +410,14 @@ void Game::MainLoop(void){
                       scene_.RemoveNode(projNode);
                     }
                   }
+
+
+				  SceneNode * enemyContainer = scene_.GetNode("Enemies");
+				  for (int i = 0; i < enemyContainer->GetChildren().size(); i++)
+				  {
+					  Enemy * enemy = (Enemy*)enemyContainer->GetChildren()[i];
+					  enemy->beHAVE();
+				  }
                 
                 
                   // Rotate propeller blades
@@ -664,6 +692,32 @@ Camera *Game::GetCamera() {
 	return &camera_;
 }
 
+Enemy *Game::CreateEnemyInstance(std::string entity_name, std::string object_name, std::string material_name, std::string texture_name, glm::vec3 origin_point, SceneNode *player, std::string type) {
+
+	// Get resources
+	Resource *geom = resman_.GetResource(object_name);
+	if (!geom) {
+		throw(GameException(std::string("Could not find resource \"") + object_name + std::string("\"")));
+	}
+
+	Resource *mat = resman_.GetResource(material_name);
+	if (!mat) {
+		throw(GameException(std::string("Could not find resource \"") + material_name + std::string("\"")));
+	}
+
+	Resource *tex = NULL;
+	if (texture_name != "") {
+		tex = resman_.GetResource(texture_name);
+		if (!mat) {
+			throw(GameException(std::string("Could not find resource \"") + material_name + std::string("\"")));
+		}
+	}
+
+	Enemy *ast = new Enemy(entity_name, geom, mat, tex, origin_point, player, type);
+	scene_.AddNode(ast);
+	camera_.AddChild(ast);
+	return ast;
+}
  
 void Game::FireMachineGun()
 {
