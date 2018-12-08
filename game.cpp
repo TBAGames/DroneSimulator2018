@@ -32,6 +32,7 @@ glm::vec3 camera_look_at_g(0.0, 0.0, 0.0);
 glm::vec3 camera_up_g(0.0, 1.0, 0.0);
 bool camswitch = false;
 int camview = 0;
+bool win_ = false;
 
 //Counter to limit the bombs dropped
 int counterB = 0;
@@ -168,6 +169,10 @@ void Game::SetupResources(void){
   filename = std::string(MATERIAL_DIRECTORY) + std::string("/textured_material");
 	resman_.LoadResource(Material, "TexturedMaterial", filename.c_str());
 
+	// Load material to be applied to the cube
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/plastic");
+	resman_.LoadResource(Material, "PlasticMaterial", filename.c_str());
+
 	// Load building texture
 	filename = std::string(MATERIAL_DIRECTORY) + std::string("/building_texture.jpg");
 	resman_.LoadResource(Texture, "BuildingTexture", filename.c_str());
@@ -188,6 +193,9 @@ void Game::SetupResources(void){
 
 	filename = std::string(MATERIAL_DIRECTORY) + std::string("/asphalt.png");
 	resman_.LoadResource(Texture, "Asphalt", filename.c_str());
+
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/end.png");
+	resman_.LoadResource(Texture, "End", filename.c_str());
 
 	filename = std::string(MATERIAL_DIRECTORY) + std::string("/smoke.png");
 	resman_.LoadResource(Texture, "Smoke", filename.c_str());
@@ -278,6 +286,10 @@ void Game::SetupScene(void){
 			building->SetPosition(glm::vec3(100.0*(i-(int)(numBuildings/2)), 50.0, 100.0*(j-(int)(numBuildings/2))));
 		}
 	}
+
+	// Create endgoal
+	SceneNode *end = CreateInstance("End", "CubeMesh", "TexturedMaterial", "End");
+	end->SetPosition(ground->GetPosition() + glm::vec3(1.0, 0.0, 0.0)*ground->GetScale().x);
 }
 
 
@@ -316,7 +328,7 @@ void Game::MainLoop(void){
     // Loop while the user did not close the window
     while (!glfwWindowShouldClose(window_)){
         // Animate the scene
-        if (animating_){
+        if (animating_ && !win_){
               static double last_time = 0;
               double current_time = glfwGetTime();
               if ((current_time - last_time) > 0.01){
@@ -360,6 +372,7 @@ void Game::MainLoop(void){
                     }
                   }
 
+				  CheckWin();
 
                   CheckCollisions();
                   skybox_->SetPosition(node->GetPosition());
@@ -378,6 +391,17 @@ void Game::MainLoop(void){
         // Update other events like input handling
         glfwPollEvents();
     }
+}
+
+void Game::CheckWin() {
+	SceneNode *ship = scene_.GetNode("Ship");
+	SceneNode *end = scene_.GetNode("End");
+
+	if (glm::distance(ship->GetPosition(), end->GetPosition()) < 3.0f)
+	{
+		win_ = true;
+		std::cout << "WIN!" << std::endl;
+	}
 }
 
 void Game::CheckCollisions(void)
