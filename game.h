@@ -116,6 +116,9 @@ namespace game {
 			// Handle collisions between gameobjects
 			void CheckCollisions(void);
 			bool IsCollidingBuilding(SceneNode *ship, SceneNode *building);
+
+			// Win con
+			void CheckWin(void);
 			
     }; // class Game
 
