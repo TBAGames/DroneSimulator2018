@@ -353,7 +353,6 @@ void Game::MainLoop(void){
                     {
                       scene_.GetNode("Projectiles")->RemoveChild(projNode);
                       scene_.RemoveNode(projNode);
-                      delete projNode;
                     }
                   }
 
