@@ -25,6 +25,7 @@ void ResourceManager::AddResource(ResourceType type, const std::string name, GLu
 
     res = new Resource(type, name, resource, size);
 
+	std::cout << name << resource << " " << res->GetType() << std::endl;
     resource_.push_back(res);
 }
 
@@ -46,7 +47,11 @@ void ResourceManager::LoadResource(ResourceType type, const std::string name, co
         LoadMaterial(name, filename);
     } else if (type == Texture){
         LoadTexture(name, filename);
-    } else if (type == Mesh){
+    }
+	else if (type == CubeMap) {
+		LoadCubeMap(name, filename);
+	}
+	else if (type == Mesh){
         LoadMesh(name, filename);
     } else {
         throw(std::invalid_argument(std::string("Invalid type of resource")));
@@ -67,66 +72,100 @@ Resource *ResourceManager::GetResource(const std::string name) const {
 
 
 void ResourceManager::LoadMaterial(const std::string name, const char *prefix){
+	// Load vertex program source code
+	std::string filename = std::string(prefix) + std::string(VERTEX_PROGRAM_EXTENSION);
+	std::string vp = LoadTextFile(filename.c_str());
 
-    // Load vertex program source code
-    std::string filename = std::string(prefix) + std::string(VERTEX_PROGRAM_EXTENSION);
-    std::string vp = LoadTextFile(filename.c_str());
+	// Load fragment program source code
+	filename = std::string(prefix) + std::string(FRAGMENT_PROGRAM_EXTENSION);
+	std::string fp = LoadTextFile(filename.c_str());
 
-    // Load fragment program source code
-    filename = std::string(prefix) + std::string(FRAGMENT_PROGRAM_EXTENSION);
-    std::string fp = LoadTextFile(filename.c_str());
+	// Create a shader from the vertex program source code
+	GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+	const char *source_vp = vp.c_str();
+	glShaderSource(vs, 1, &source_vp, NULL);
+	glCompileShader(vs);
 
-    // Create a shader from the vertex program source code
-    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-    const char *source_vp = vp.c_str();
-    glShaderSource(vs, 1, &source_vp, NULL);
-    glCompileShader(vs);
+	// Check if shader compiled successfully
+	GLint status;
+	glGetShaderiv(vs, GL_COMPILE_STATUS, &status);
+	if (status != GL_TRUE) {
+		char buffer[512];
+		glGetShaderInfoLog(vs, 512, NULL, buffer);
+		throw(std::ios_base::failure(std::string("Error compiling vertex shader: ") + std::string(buffer)));
+	}
 
-    // Check if shader compiled successfully
-    GLint status;
-    glGetShaderiv(vs, GL_COMPILE_STATUS, &status);
-    if (status != GL_TRUE){
-        char buffer[512];
-        glGetShaderInfoLog(vs, 512, NULL, buffer);
-        throw(std::ios_base::failure(std::string("Error compiling vertex shader: ")+std::string(buffer)));
-    }
+	// Create a shader from the fragment program source code
+	GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+	const char *source_fp = fp.c_str();
+	glShaderSource(fs, 1, &source_fp, NULL);
+	glCompileShader(fs);
 
-    // Create a shader from the fragment program source code
-    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-    const char *source_fp = fp.c_str();
-    glShaderSource(fs, 1, &source_fp, NULL);
-    glCompileShader(fs);
+	// Check if shader compiled successfully
+	glGetShaderiv(fs, GL_COMPILE_STATUS, &status);
+	if (status != GL_TRUE) {
+		char buffer[512];
+		glGetShaderInfoLog(fs, 512, NULL, buffer);
+		throw(std::ios_base::failure(std::string("Error compiling fragment shader: ") + std::string(buffer)));
+	}
 
-    // Check if shader compiled successfully
-    glGetShaderiv(fs, GL_COMPILE_STATUS, &status);
-    if (status != GL_TRUE){
-        char buffer[512];
-        glGetShaderInfoLog(fs, 512, NULL, buffer);
-        throw(std::ios_base::failure(std::string("Error compiling fragment shader: ")+std::string(buffer)));
-    }
+	// Try to also load a geometry shader
+	filename = std::string(prefix) + std::string(GEOMETRY_PROGRAM_EXTENSION);
+	bool geometry_program = false;
+	std::string gp = "";
+	GLuint gs;
+	try {
+		gp = LoadTextFile(filename.c_str());
+		geometry_program = true;
+	}
+	catch (std::exception &e) {
+	}
 
-    // Create a shader program linking both vertex and fragment shaders
-    // together
-    GLuint sp = glCreateProgram();
-    glAttachShader(sp, vs);
-    glAttachShader(sp, fs);
-    glLinkProgram(sp);
+	if (geometry_program) {
+		// Create a shader from the geometry program source code
+		gs = glCreateShader(GL_GEOMETRY_SHADER);
+		const char *source_gp = gp.c_str();
+		glShaderSource(gs, 1, &source_gp, NULL);
+		glCompileShader(gs);
 
-    // Check if shaders were linked successfully
-    glGetProgramiv(sp, GL_LINK_STATUS, &status);
-    if (status != GL_TRUE){
-        char buffer[512];
-        glGetShaderInfoLog(sp, 512, NULL, buffer);
-        throw(std::ios_base::failure(std::string("Error linking shaders: ")+std::string(buffer)));
-    }
+		// Check if shader compiled successfully
+		GLint status;
+		glGetShaderiv(gs, GL_COMPILE_STATUS, &status);
+		if (status != GL_TRUE) {
+			char buffer[512];
+			glGetShaderInfoLog(gs, 512, NULL, buffer);
+			throw(std::ios_base::failure(std::string("Error compiling geometry shader: ") + std::string(buffer)));
+		}
+	}
 
-    // Delete memory used by shaders, since they were already compiled
-    // and linked
-    glDeleteShader(vs);
-    glDeleteShader(fs);
+	// Create a shader program linking both vertex and fragment shaders
+	// together
+	GLuint sp = glCreateProgram();
+	glAttachShader(sp, vs);
+	glAttachShader(sp, fs);
+	if (geometry_program) {
+		glAttachShader(sp, gs);
+	}
+	glLinkProgram(sp);
 
-    // Add a resource for the shader program
-    AddResource(Material, name, sp, 0);
+	// Check if shaders were linked successfully
+	glGetProgramiv(sp, GL_LINK_STATUS, &status);
+	if (status != GL_TRUE) {
+		char buffer[512];
+		glGetShaderInfoLog(sp, 512, NULL, buffer);
+		throw(std::ios_base::failure(std::string("Error linking shaders: ") + std::string(buffer)));
+	}
+
+	// Delete memory used by shaders, since they were already compiled
+	// and linked
+	glDeleteShader(vs);
+	glDeleteShader(fs);
+	if (geometry_program) {
+		glDeleteShader(gs);
+	}
+
+	// Add a resource for the shader program
+	AddResource(Material, name, sp, 0);
 }
 
 
@@ -436,6 +475,34 @@ void ResourceManager::CreateSphere(std::string object_name, float radius, int nu
     AddResource(Mesh, object_name, vbo, ebo, face_num * face_att);
 }
 
+void ResourceManager::LoadCubeMap(const std::string name, const char *filename) {
+
+	// Get base and extension of filename
+	std::string fn(filename);
+	int pos = fn.find(".");
+	std::string base = fn.substr(0, pos);
+	std::string ext = fn.substr(pos + 1);
+
+	// Create filenames of each individual cube face
+	std::string fn_xp = base + "_ft." + ext;
+	std::string fn_xn = base + "_bk." + ext;
+	std::string fn_yp = base + "_up." + ext;
+	std::string fn_yn = base + "_dn." + ext;
+	std::string fn_zp = base + "_rt." + ext;
+	std::string fn_zn = base + "_lf." + ext;
+
+	// Load cube map from file
+	GLuint texture = SOIL_load_OGL_cubemap(fn_xp.c_str(), fn_xn.c_str(), fn_yp.c_str(), fn_yn.c_str(), fn_zp.c_str(), fn_zn.c_str(), SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, 0);
+	if (!texture) {
+		throw(std::ios_base::failure(std::string("Error loading cube map ") + std::string(base) + std::string("<spec>.") + std::string(ext) + std::string(": ") + std::string(SOIL_last_result())));
+	}
+
+	// Create resource
+	AddResource(CubeMap, name, texture, 0);
+}
+
+
+
 
 void ResourceManager::CreateCylinder(std::string object_name, float height, float radius, int num_tube_samples, int num_circle_samples) {
 
@@ -539,6 +606,69 @@ void ResourceManager::CreateCylinder(std::string object_name, float height, floa
 
 	// Create resource
 	AddResource(Mesh, object_name, vbo, ebo, face_num * face_att);
+}
+
+void ResourceManager::CreateSphereParticles(std::string object_name, int num_particles) {
+
+	// Create a set of points which will be the particles
+	// This is similar to drawing a sphere: we will sample points on a sphere, but will allow them to also deviate a bit from the sphere along the normal (change of radius)
+
+	// Data buffer
+	GLfloat *particle = NULL;
+
+	// Number of attributes per particle: position (3), normal (3), and color (3), texture coordinates (2)
+	const int particle_att = 11;
+
+	// Allocate memory for buffer
+	try {
+		particle = new GLfloat[num_particles * particle_att];
+	}
+	catch (std::exception &e) {
+		throw e;
+	}
+
+	float trad = 0.2; // Defines the starting point of the particles along the normal
+	float maxspray = 0.5; // This is how much we allow the points to deviate from the sphere
+	float u, v, w, theta, phi, spray; // Work variables
+
+	for (int i = 0; i < num_particles; i++) {
+
+		// Get three random numbers
+		u = ((double)rand() / (RAND_MAX));
+		v = ((double)rand() / (RAND_MAX));
+		w = ((double)rand() / (RAND_MAX));
+
+		// Use u to define the angle theta along one direction of the sphere
+		theta = u * 2.0*glm::pi<float>();
+		// Use v to define the angle phi along the other direction of the sphere
+		phi = acos(2.0*v - 1.0);
+		// Use w to define how much we can deviate from the surface of the sphere (change of radius)
+		spray = maxspray * pow((float)w, (float)(1.0 / 3.0)); // Cubic root of w
+
+															  // Define the normal and point based on theta, phi and the spray
+		glm::vec3 normal(spray*cos(theta)*sin(phi), spray*sin(theta)*sin(phi), spray*cos(phi));
+		glm::vec3 position(normal.x*trad, normal.y*trad, normal.z*trad);
+		glm::vec3 color(i / (float)num_particles, 0.0, 1.0 - (i / (float)num_particles)); // We can use the color for debug, if needed
+
+																						  // Add vectors to the data buffer
+		for (int k = 0; k < 3; k++) {
+			particle[i*particle_att + k] = position[k];
+			particle[i*particle_att + k + 3] = normal[k];
+			particle[i*particle_att + k + 6] = color[k];
+		}
+	}
+
+	// Create OpenGL buffer and copy data
+	GLuint vbo;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, num_particles * particle_att * sizeof(GLfloat), particle, GL_STATIC_DRAW);
+
+	// Free data buffers
+	delete[] particle;
+
+	// Create resource
+	AddResource(PointSet, object_name, vbo, 0, num_particles);
 }
 
 

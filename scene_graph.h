@@ -36,7 +36,8 @@ namespace game {
             
             // Create a scene node from two resources
             SceneNode *CreateNode(std::string node_name, Resource *geometry, Resource *material, Resource *texture = NULL);
-            // Add an already-created node
+			void RemoveNode(SceneNode *node);
+			// Add an already-created node
             void AddNode(SceneNode *node);
             // Find a scene node with a specific name
             SceneNode *GetNode(std::string node_name) const;
