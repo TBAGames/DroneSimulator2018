@@ -252,15 +252,7 @@ void Game::SetupScene(void){
 	propel3->Scale(glm::vec3(0.1, 0.05, 0.5));
 	propel4->Scale(glm::vec3(0.1, 0.05, 0.5));
 
- //   // Create an instance of the turret
-
-	SceneNode *turretBase = CreateInstance("TurretBase", "TurretMesh", "TexturedMaterial", "Crystal");
-	SceneNode *turretHead = CreateInstance("TurretHead", "TurretMesh", "TexturedMaterial", "Nebula");
-	SceneNode *cannonBase = CreateInstance("CannonBase", "TurretMesh", "TexturedMaterial", "Crystal");
-	SceneNode *cannonHead = CreateInstance("CannonHead", "TurretMesh", "TexturedMaterial", "Nebula");
-
     // Adjust the instance
-
 	game::SceneNode *projectileContainer = CreateInstance("Projectiles", "CubeMesh", "ShinyBlueMaterial");
 	projectileContainer->SetScale(0.001f*glm::vec3(1.0, 1.0, 1.0));
 
@@ -280,34 +272,35 @@ void Game::SetupScene(void){
 	{
 		for (int j = 0; j < numBuildings; j++)
 		{
-			SceneNode *building = CreateInstance("Building" + (i*numBuildings)+j, "CubeMesh", "TexturedMaterial", "BuildingTexture");
+			SceneNode *building = CreateInstance("Building" + (i*numBuildings) + j, "CubeMesh", "TexturedMaterial", "BuildingTexture");
 			ground->AddChild(building);
 			building->SetScale(glm::vec3(5.0, 100.0, 5.0));
-			building->SetPosition(glm::vec3(100.0*(i-(int)(numBuildings/2)), 50.0, 100.0*(j-(int)(numBuildings/2))));
+			building->SetPosition(glm::vec3(10.0 + 100.0*(i - (int)(numBuildings / 2)), 50.0, 100.0*(j - (int)(numBuildings / 2))));
 		}
 
-	int numEnemies = 3;
-	game::SceneNode *enemyContainer = CreateInstance("Enemies", "CubeMesh", "ShinyBlueMaterial");
-	for (int i = 0; i < numEnemies; i++)
-	{
-		for (int j = 0; j < numEnemies; j++)
+		int numEnemies = 3;
+		game::SceneNode *enemyContainer = CreateInstance("Enemies", "CubeMesh", "ShinyBlueMaterial");
+		for (int i = 0; i < numEnemies; i++)
 		{
-			if (j % 2 == 0)
+			for (int j = 0; j < numEnemies; j++)
 			{
-				Enemy *enemy = CreateEnemyInstance("Enemy" + (i*numEnemies) + j, "CubeMesh", "ShinyBlueMaterial", "BuildingTexture", glm::vec3(100.0*(i - (int)(numEnemies / 2)) + 25, 0.0, 100.0*(j - (int)(numEnemies / 2)) + 25), ship, "Bird");
-				enemyContainer->AddChild(enemy);
-			}
-			else
-			{
-				Enemy *enemy = CreateEnemyInstance("Enemy" + (i*numEnemies) + j, "CubeMesh", "ShinyBlueMaterial", "BuildingTexture", glm::vec3(100.0*(i - (int)(numEnemies / 2)) + 25, 50.0f, 100.0*(j - (int)(numEnemies / 2)) + 25), ship, "Dog");
-				enemyContainer->AddChild(enemy);
+				if (j % 2 == 0)
+				{
+					Enemy *enemy = CreateEnemyInstance("Enemy" + (i*numEnemies) + j, "CubeMesh", "ShinyBlueMaterial", "BuildingTexture", glm::vec3(100.0*(i - (int)(numEnemies / 2)) + 25, 0.0, 100.0*(j - (int)(numEnemies / 2)) + 25), ship, "Bird");
+					enemyContainer->AddChild(enemy);
+				}
+				else
+				{
+					Enemy *enemy = CreateEnemyInstance("Enemy" + (i*numEnemies) + j, "CubeMesh", "ShinyBlueMaterial", "BuildingTexture", glm::vec3(100.0*(i - (int)(numEnemies / 2)) + 25, 50.0f, 100.0*(j - (int)(numEnemies / 2)) + 25), ship, "Dog");
+					enemyContainer->AddChild(enemy);
+				}
 			}
 		}
-	}
 
-	// Create endgoal
-	SceneNode *end = CreateInstance("End", "CubeMesh", "TexturedMaterial", "End");
-	end->SetPosition(ground->GetPosition() + glm::vec3(1.0, 0.0, 0.0)*ground->GetScale().x);
+		// Create endgoal
+		SceneNode *end = CreateInstance("End", "CubeMesh", "TexturedMaterial", "End");
+		end->SetPosition(ground->GetPosition() + glm::vec3(1.0, 0.0, 0.0)*ground->GetScale().x);
+	}
 }
 
 
@@ -423,7 +416,7 @@ void Game::CheckWin() {
 	SceneNode *ship = scene_.GetNode("Ship");
 	SceneNode *end = scene_.GetNode("End");
 
-	if (glm::distance(ship->GetPosition(), end->GetPosition()) < 3.0f)
+	if (glm::distance(ship->GetPosition(), end->GetPosition()) < 5.0f)
 	{
 		win_ = true;
 		std::cout << "WIN!" << std::endl;
