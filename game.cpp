@@ -137,7 +137,14 @@ void Game::SetupResources(void){
 
 	// Load material to be applied to particles
 	filename = std::string(MATERIAL_DIRECTORY) + std::string("/smoke");
-	resman_.LoadResource(Material, "ParticleMaterial", filename.c_str());
+	resman_.LoadResource(Material, "SmokeParticleMaterial", filename.c_str());
+
+	// Load material to be applied to particles
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/muzzle_flash");
+	resman_.LoadResource(Material, "MuzzleParticleMaterial", filename.c_str());
+
+	filename = std::string(MATERIAL_DIRECTORY) + std::string("/flame");
+	resman_.LoadResource(Material, "FireParticleMaterial", filename.c_str());
 
 	// Create particles for explosion
 	resman_.CreateSphereParticles("SphereParticles");
@@ -171,6 +178,7 @@ void Game::SetupResources(void){
 
 	// Create a simple sphere to represent the asteroids
 	resman_.CreateSphere("SimpleSphereMesh", 0.5, 10, 10);
+
 	// Load material to be applied to asteroids
 	filename = std::string(MATERIAL_DIRECTORY) + std::string("/material");
 	resman_.LoadResource(Material, "ObjectMaterial", filename.c_str());
@@ -272,11 +280,11 @@ void Game::SetupScene(void){
 		}
 	}*/
 
-	game::SceneNode *particles1 = CreateInstance("ParticleInstance1", "SphereParticles", "ParticleMaterial", "Smoke");
+	//game::SceneNode *particles1 = CreateInstance("ParticleInstance1", "SphereParticles", "ParticleMaterial", "Smoke");
 	//game::SceneNode *particles2 = CreateInstance("ParticleInstance2", "SphereParticles", "ParticleMaterial");
 	//game::SceneNode *particles3 = CreateInstance("ParticleInstance3", "SphereParticles", "ParticleMaterial");
 
-	particles1->Translate(ship->GetPosition() + ship->GetForward() * 10.0f);
+	//particles1->Translate(ship->GetPosition() + ship->GetForward() * 10.0f);
 	//particles2->Translate(ship->GetPosition() + glm::vec3(0.5, 0.5, 0.0));
 	//particles3->Translate(ship->GetPosition() + glm::vec3(-0.5, -0.5, 0.0));
 }
@@ -599,10 +607,10 @@ void Game::FireMachineGun()
 {
 	//Create an instance of the bullet 
 	Bullet *bullet = CreateBullet();
-	game::SceneNode *node = scene_.GetNode("Ship");
-
-	//Put the instances made, into a scene tree 
+	SceneNode *node = scene_.GetNode("Ship");
 	SceneNode *projectileContainer = scene_.GetNode("Projectiles");
+	SceneNode *bulletEffect = CreateInstance("ParticleInstance1", "SphereParticles", "MuzzleParticleMaterial");
+
 	projectileContainer->AddChild(bullet);
 
 	//Gets the position of where the bullet will start, the direction it will head, speed of the bullet
@@ -610,16 +618,22 @@ void Game::FireMachineGun()
 	bullet->SetOrientation(node->GetOrientation());
 	bullet->SetDir(node->GetForward());
 	bullet->SetSpeed(2.5f);
+
+	bullet->AddChild(bulletEffect);
+
+	bulletEffect->SetPosition(-1.0f * bullet->GetForward());
+	bulletEffect->SetOrientation(bullet->GetOrientation());
+
 }
 
 void Game::DropBomb()
 {
 	//Create an instance of the bomb 
 	Bomb *bomb = CreateBomb();
-	game::SceneNode *node = scene_.GetNode("Ship");
-
-	//Put the instances made, into a scene tree
+	SceneNode *node = scene_.GetNode("Ship");
 	SceneNode *projectileContainer = scene_.GetNode("Projectiles");
+	SceneNode *bombEffect = CreateInstance("ParticleInstance1", "SphereParticles", "SmokeParticleMaterial", "Smoke");
+
 	projectileContainer->AddChild(bomb);
 
 	//Gets the position of where the bomb will start, the direction it will head, speed of the bomb
@@ -627,23 +641,34 @@ void Game::DropBomb()
 	bomb->SetOrientation(node->GetOrientation());
 	bomb->SetDir(-(node->GetUp()));
 	bomb->SetSpeed(0.25f);
+
+	bomb->AddChild(bombEffect);
+
+	bombEffect->SetPosition(-3.0f * bomb->GetForward());
+	bombEffect->SetOrientation(bomb->GetOrientation());
+
 }
 
 void Game::EngageRockets()
 {
 	//Create an instance of the rocket 
-	Rocket *rocket = CreateRocket();
-	game::SceneNode *node = scene_.GetNode("Ship");
-
-	//Put the instances made, into a scene tree
+	Bomb *rocket = CreateBomb();
+	SceneNode *node = scene_.GetNode("Ship");
 	SceneNode *projectileContainer = scene_.GetNode("Projectiles");
+	SceneNode *rocketEffect = CreateInstance("ParticleInstance1", "SphereParticles", "FireParticleMaterial", "Fire");
+
 	projectileContainer->AddChild(rocket);
 
-	//Gets the position of where the bomb will start, the direction it will head, speed of the rocket
-	rocket->SetPosition((node->GetPosition()) + node->GetUp()*2.0f);
+	//Gets the position of where the rocket will start, the direction it will head, speed of the rocket
+	rocket->SetPosition((node->GetPosition()) + node->GetForward()*3.0f);
 	rocket->SetOrientation(node->GetOrientation());
 	rocket->SetDir(node->GetForward());
 	rocket->SetSpeed(0.25f);
+
+	rocket->AddChild(rocketEffect);
+
+	rocketEffect->SetPosition(-1.0f * rocket->GetForward());
+	rocketEffect->SetOrientation(rocket->GetOrientation() + glm::quat(rocket->GetUp(), glm::vec3(3.5, 5.0, 0.0)));
 }
 
 
